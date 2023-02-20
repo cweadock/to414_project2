@@ -39,13 +39,17 @@ tele$X <- NULL
 tele$pdaysdummy <- ifelse(tele$pdays == 999, 0, 1)
 tele$pdays <- NULL
 
-str(tele)
+
+#banding age into generational categories
+tele$age_range <- ifelse(tele$age <= 25 , "Under 25" ,
+                        ifelse(tele$age > 25 & tele$age <= 42, "26-42", 
+                               ifelse(tele$age > 42 & tele$age <= 58, "43-58", "Over 58")))
+
+tele$age <- NULL
+
+
 ```
 
-**Additional Cleaning to think about?**
-
-- consolidating month because has lot of levels? maybe create new variable for quarters?
-- maybe consolidate education? what do basic 4/6 yrs mean?
 
 
 ## Getting Data Ready for Analysis
@@ -80,6 +84,9 @@ test_set <- sample(1:nrow(tele_norm), 10000)
 # Depending on R-version and computer, different rows may be selected. 
 # If that happens, results are different. 
 
+log_train <- tele_norm[ -test_set, ]
+log_test <- tele_norm[ test_set , ]
+
 # Create a train set and test set
 #First the predictors - all columns except the yyes column
 tele_train <- tele_norm[-test_set, -match("yyes",names(tele_norm))]
@@ -96,10 +103,66 @@ tele_test_labels <- tele_norm[test_set, "yyes"]
 
 # Logistic Regression
 
-as;lkfj;alsdjf;lajg;ljsag;ljsdlfj
+```{r log model main effects}
+
+log_model_ME <- glm(yyes ~ . , data = log_train , family = "binomial")
+summary(log_model_ME)
+
+log_pred_ME <- predict(log_model_ME , log_test)
+
+library(caret)
+postResample(log_pred_ME , log_test$yyes)
+
+```
+
+
+```{r}
+
+
+#insert interactions
+
+
+
+
+```
+
 
 
 # KNN Model
+
+```{r}
+
+library(class)
+
+knn_model <- knn(tele_train , tele_test , cl = tele_train_labels, k = 10)
+
+library(gmodels)
+
+CrossTable(knn_model , tele_test_labels)
+
+```
+
+```{r probably meet}
+
+
+#tele_zscore <- as.data.frame(model.matrix(~.-1,tele))
+
+#tele_train_zscore <- tele_zscore[-test_set, -match("yyes",names(tele_norm))]
+#tele_test_zscore <- tele_zscore[test_set, -match("yyes",names(tele_norm))]
+
+#tele_train_labels_zscore <- tele_norm[-test_set, "yyes"]
+#tele_test_labels_zscore <- tele_norm[test_set, "yyes"]
+
+
+#knn_zscore <- knn(tele_train_zscore, tele_test_zscore, cl = tele_train_labels_zscore, k = 20)
+
+
+#CrossTable(knn_zscore , tele_test_labels_zscore)
+
+```
+
+
+
 
 
 # ANN Model

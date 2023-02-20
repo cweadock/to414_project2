@@ -629,44 +629,22 @@ Regression</a></li>
 <span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>tele<span class="sc">$</span>pdaysdummy <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(tele<span class="sc">$</span>pdays <span class="sc">==</span> <span class="dv">999</span>, <span class="dv">0</span>, <span class="dv">1</span>)</span>
 <span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>tele<span class="sc">$</span>pdays <span class="ot">&lt;-</span> <span class="cn">NULL</span></span>
 <span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(tele)</span></code></pre></div>
-<pre><code>## &#39;data.frame&#39;:    41188 obs. of  20 variables:
-##  $ age           : int  56 57 37 40 56 45 59 41 24 25 ...
-##  $ job           : Factor w/ 12 levels &quot;admin.&quot;,&quot;blue-collar&quot;,..: 4 8 8 1 8 8 1 2 10 8 ...
-##  $ marital       : Factor w/ 4 levels &quot;divorced&quot;,&quot;married&quot;,..: 2 2 2 2 2 2 2 2 3 3 ...
-##  $ education     : Factor w/ 8 levels &quot;basic.4y&quot;,&quot;basic.6y&quot;,..: 1 4 4 2 4 3 6 8 6 4 ...
-##  $ default       : Factor w/ 3 levels &quot;no&quot;,&quot;unknown&quot;,..: 1 2 1 1 1 2 1 2 1 1 ...
-##  $ housing       : Factor w/ 3 levels &quot;no&quot;,&quot;unknown&quot;,..: 1 1 3 1 1 1 1 1 3 3 ...
-##  $ loan          : Factor w/ 3 levels &quot;no&quot;,&quot;unknown&quot;,..: 1 1 1 1 3 1 1 1 1 1 ...
-##  $ contact       : Factor w/ 2 levels &quot;cellular&quot;,&quot;telephone&quot;: 2 2 2 2 2 2 2 2 2 2 ...
-##  $ month         : Factor w/ 10 levels &quot;apr&quot;,&quot;aug&quot;,&quot;dec&quot;,..: 7 7 7 7 7 7 7 7 7 7 ...
-##  $ day_of_week   : Factor w/ 5 levels &quot;fri&quot;,&quot;mon&quot;,&quot;thu&quot;,..: 2 2 2 2 2 2 2 2 2 2 ...
-##  $ campaign      : int  1 1 1 1 1 1 1 1 1 1 ...
-##  $ previous      : int  0 0 0 0 0 0 0 0 0 0 ...
-##  $ poutcome      : Factor w/ 3 levels &quot;failure&quot;,&quot;nonexistent&quot;,..: 2 2 2 2 2 2 2 2 2 2 ...
-##  $ emp.var.rate  : num  1.1 1.1 1.1 1.1 1.1 1.1 1.1 1.1 1.1 1.1 ...
-##  $ cons.price.idx: num  94 94 94 94 94 ...
-##  $ cons.conf.idx : num  -36.4 -36.4 -36.4 -36.4 -36.4 -36.4 -36.4 -36.4 -36.4 -36.4 ...
-##  $ euribor3m     : num  4.86 4.86 4.86 4.86 4.86 ...
-##  $ nr.employed   : num  5191 5191 5191 5191 5191 ...
-##  $ y             : Factor w/ 2 levels &quot;no&quot;,&quot;yes&quot;: 1 1 1 1 1 1 1 1 1 1 ...
-##  $ pdaysdummy    : num  0 0 0 0 0 0 0 0 0 0 ...</code></pre>
-<p><strong>Additional Cleaning to think about?</strong></p>
-<ul>
-<li>consolidating month because has lot of levels? maybe create new
-variable for quarters?</li>
-<li>maybe consolidate education? what do basic 4/6 yrs mean?</li>
-</ul>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="co">#banding age into generational categories</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>tele<span class="sc">$</span>age_range <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(tele<span class="sc">$</span>age <span class="sc">&lt;=</span> <span class="dv">25</span> , <span class="st">&quot;Under 25&quot;</span> ,</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>                        <span class="fu">ifelse</span>(tele<span class="sc">$</span>age <span class="sc">&gt;</span> <span class="dv">25</span> <span class="sc">&amp;</span> tele<span class="sc">$</span>age <span class="sc">&lt;=</span> <span class="dv">42</span>, <span class="st">&quot;26-42&quot;</span>, </span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>                               <span class="fu">ifelse</span>(tele<span class="sc">$</span>age <span class="sc">&gt;</span> <span class="dv">42</span> <span class="sc">&amp;</span> tele<span class="sc">$</span>age <span class="sc">&lt;=</span> <span class="dv">58</span>, <span class="st">&quot;43-58&quot;</span>, <span class="st">&quot;Over 58&quot;</span>)))</span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>tele<span class="sc">$</span>age <span class="ot">&lt;-</span> <span class="cn">NULL</span></span></code></pre></div>
 </div>
 <div id="getting-data-ready-for-analysis" class="section level2">
 <h2>Getting Data Ready for Analysis</h2>
-<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Using model.matrix to convert all the factors to dummy variables</span></span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="co"># We are converting all of the factors into dummy variables as the input into knn has to be numeric</span></span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>telemm <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(<span class="fu">model.matrix</span>(<span class="sc">~</span>.<span class="sc">-</span><span class="dv">1</span>,tele))</span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(telemm)</span></code></pre></div>
-<pre><code>## &#39;data.frame&#39;:    41188 obs. of  54 variables:
-##  $ age                         : num  56 57 37 40 56 45 59 41 24 25 ...
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Using model.matrix to convert all the factors to dummy variables</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="co"># We are converting all of the factors into dummy variables as the input into knn has to be numeric</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>telemm <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(<span class="fu">model.matrix</span>(<span class="sc">~</span>.<span class="sc">-</span><span class="dv">1</span>,tele))</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(telemm)</span></code></pre></div>
+<pre><code>## &#39;data.frame&#39;:    41188 obs. of  56 variables:
 ##  $ jobadmin.                   : num  0 0 0 1 0 0 1 0 0 0 ...
 ##  $ jobblue-collar              : num  0 0 0 0 0 0 0 1 0 0 ...
 ##  $ jobentrepreneur             : num  0 0 0 0 0 0 0 0 0 0 ...
@@ -719,35 +697,41 @@ variable for quarters?</li>
 ##  $ euribor3m                   : num  4.86 4.86 4.86 4.86 4.86 ...
 ##  $ nr.employed                 : num  5191 5191 5191 5191 5191 ...
 ##  $ yyes                        : num  0 0 0 0 0 0 0 0 0 0 ...
-##  $ pdaysdummy                  : num  0 0 0 0 0 0 0 0 0 0 ...</code></pre>
-<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Randomize the rows in the data (shuffling the rows)</span></span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">12345</span>)</span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>tele_random <span class="ot">&lt;-</span> telemm[<span class="fu">sample</span>(<span class="fu">nrow</span>(telemm)),]</span>
-<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="co">#Normalize the data</span></span>
-<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>normalize <span class="ot">&lt;-</span> <span class="cf">function</span>(x) {</span>
-<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span> ((x <span class="sc">-</span> <span class="fu">min</span>(x)) <span class="sc">/</span> (<span class="fu">max</span>(x) <span class="sc">-</span> <span class="fu">min</span>(x)))</span>
-<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a><span class="co"># we are going to normalize everything </span></span>
-<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>tele_norm <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(<span class="fu">lapply</span>(tele_random, normalize))</span></code></pre></div>
+##  $ pdaysdummy                  : num  0 0 0 0 0 0 0 0 0 0 ...
+##  $ age_range43-58              : num  1 1 0 0 1 1 0 0 0 0 ...
+##  $ age_rangeOver 58            : num  0 0 0 0 0 0 1 0 0 0 ...
+##  $ age_rangeUnder 25           : num  0 0 0 0 0 0 0 0 1 1 ...</code></pre>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Randomize the rows in the data (shuffling the rows)</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">12345</span>)</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>tele_random <span class="ot">&lt;-</span> telemm[<span class="fu">sample</span>(<span class="fu">nrow</span>(telemm)),]</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="co">#Normalize the data</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>normalize <span class="ot">&lt;-</span> <span class="cf">function</span>(x) {</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span> ((x <span class="sc">-</span> <span class="fu">min</span>(x)) <span class="sc">/</span> (<span class="fu">max</span>(x) <span class="sc">-</span> <span class="fu">min</span>(x)))</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a><span class="co"># we are going to normalize everything </span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>tele_norm <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(<span class="fu">lapply</span>(tele_random, normalize))</span></code></pre></div>
 </div>
 <div id="getting-train-and-test-samples" class="section level2">
 <h2>Getting Train and Test Samples</h2>
-<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Selects 10000 random rows for test data</span></span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">12345</span>)</span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>test_set <span class="ot">&lt;-</span> <span class="fu">sample</span>(<span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(tele_norm), <span class="dv">10000</span>) </span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Depending on R-version and computer, different rows may be selected. </span></span>
-<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="co"># If that happens, results are different. </span></span>
-<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Create a train set and test set</span></span>
-<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a><span class="co">#First the predictors - all columns except the yyes column</span></span>
-<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>tele_train <span class="ot">&lt;-</span> tele_norm[<span class="sc">-</span>test_set, <span class="sc">-</span><span class="fu">match</span>(<span class="st">&quot;yyes&quot;</span>,<span class="fu">names</span>(tele_norm))]</span>
-<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>tele_test <span class="ot">&lt;-</span> tele_norm[test_set, <span class="sc">-</span><span class="fu">match</span>(<span class="st">&quot;yyes&quot;</span>,<span class="fu">names</span>(tele_norm))]</span>
-<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a><span class="co">#Now the response (aka Labels) - only the yyes column</span></span>
-<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>tele_train_labels <span class="ot">&lt;-</span> tele_norm[<span class="sc">-</span>test_set, <span class="st">&quot;yyes&quot;</span>]</span>
-<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>tele_test_labels <span class="ot">&lt;-</span> tele_norm[test_set, <span class="st">&quot;yyes&quot;</span>]</span></code></pre></div>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Selects 10000 random rows for test data</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">12345</span>)</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>test_set <span class="ot">&lt;-</span> <span class="fu">sample</span>(<span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(tele_norm), <span class="dv">10000</span>) </span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Depending on R-version and computer, different rows may be selected. </span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="co"># If that happens, results are different. </span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>log_train <span class="ot">&lt;-</span> tele_norm[ <span class="sc">-</span>test_set, ]</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>log_test <span class="ot">&lt;-</span> tele_norm[ test_set , ]</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Create a train set and test set</span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a><span class="co">#First the predictors - all columns except the yyes column</span></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>tele_train <span class="ot">&lt;-</span> tele_norm[<span class="sc">-</span>test_set, <span class="sc">-</span><span class="fu">match</span>(<span class="st">&quot;yyes&quot;</span>,<span class="fu">names</span>(tele_norm))]</span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>tele_test <span class="ot">&lt;-</span> tele_norm[test_set, <span class="sc">-</span><span class="fu">match</span>(<span class="st">&quot;yyes&quot;</span>,<span class="fu">names</span>(tele_norm))]</span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a><span class="co">#Now the response (aka Labels) - only the yyes column</span></span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>tele_train_labels <span class="ot">&lt;-</span> tele_norm[<span class="sc">-</span>test_set, <span class="st">&quot;yyes&quot;</span>]</span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>tele_test_labels <span class="ot">&lt;-</span> tele_norm[test_set, <span class="st">&quot;yyes&quot;</span>]</span></code></pre></div>
 <blockquote>
 <p>Now you are ready to build your ANN model. Feel free to modify the
 data load, cleaning and preparation code above as per your
@@ -757,6 +741,94 @@ preference.</p>
 </div>
 <div id="logistic-regression" class="section level1">
 <h1>Logistic Regression</h1>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>log_model_ME <span class="ot">&lt;-</span> <span class="fu">glm</span>(yyes <span class="sc">~</span> . , <span class="at">data =</span> log_train , <span class="at">family =</span> <span class="st">&quot;binomial&quot;</span>)</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(log_model_ME)</span></code></pre></div>
+<pre><code>## 
+## Call:
+## glm(formula = yyes ~ ., family = &quot;binomial&quot;, data = log_train)
+## 
+## Deviance Residuals: 
+##     Min       1Q   Median       3Q      Max  
+## -2.0827  -0.3918  -0.3188  -0.2636   2.8942  
+## 
+## Coefficients: (2 not defined because of singularities)
+##                                Estimate Std. Error z value Pr(&gt;|z|)    
+## (Intercept)                   -1.980381   0.524789  -3.774 0.000161 ***
+## jobadmin.                      0.027264   0.239122   0.114 0.909223    
+## jobblue.collar                -0.088788   0.241306  -0.368 0.712911    
+## jobentrepreneur               -0.057186   0.262887  -0.218 0.827795    
+## jobhousemaid                  -0.168017   0.272168  -0.617 0.537018    
+## jobmanagement                  0.028164   0.247715   0.114 0.909479    
+## jobretired                     0.042907   0.253831   0.169 0.865766    
+## jobself.employed               0.004050   0.259447   0.016 0.987546    
+## jobservices                   -0.094960   0.247082  -0.384 0.700736    
+## jobstudent                     0.209891   0.258638   0.812 0.417065    
+## jobtechnician                  0.022422   0.241945   0.093 0.926161    
+## jobunemployed                  0.078710   0.263004   0.299 0.764732    
+## jobunknown                           NA         NA      NA       NA    
+## maritalmarried                -0.002442   0.068703  -0.036 0.971648    
+## maritalsingle                  0.068965   0.076900   0.897 0.369816    
+## maritalunknown                 0.145411   0.435634   0.334 0.738536    
+## educationbasic.6y              0.270789   0.119199   2.272 0.023102 *  
+## educationbasic.9y              0.092869   0.096074   0.967 0.333720    
+## educationhigh.school           0.105561   0.093887   1.124 0.260866    
+## educationilliterate            0.285863   0.879193   0.325 0.745073    
+## educationprofessional.course   0.130792   0.103084   1.269 0.204516    
+## educationuniversity.degree     0.197298   0.094135   2.096 0.036091 *  
+## educationunknown               0.206119   0.121594   1.695 0.090050 .  
+## defaultunknown                -0.282074   0.066889  -4.217 2.48e-05 ***
+## defaultyes                    -7.498194 119.468156  -0.063 0.949955    
+## housingunknown                -0.130678   0.141571  -0.923 0.355977    
+## housingyes                    -0.045211   0.041485  -1.090 0.275795    
+## loanunknown                          NA         NA      NA       NA    
+## loanyes                        0.028853   0.056700   0.509 0.610839    
+## contacttelephone              -0.638289   0.076096  -8.388  &lt; 2e-16 ***
+## monthaug                       0.373946   0.125406   2.982 0.002865 ** 
+## monthdec                       0.375967   0.215859   1.742 0.081557 .  
+## monthjul                       0.053385   0.095900   0.557 0.577746    
+## monthjun                      -0.547474   0.130014  -4.211 2.54e-05 ***
+## monthmar                       1.344401   0.149868   8.971  &lt; 2e-16 ***
+## monthmay                      -0.481211   0.083764  -5.745 9.20e-09 ***
+## monthnov                      -0.456552   0.121018  -3.773 0.000162 ***
+## monthoct                      -0.017396   0.157471  -0.110 0.912037    
+## monthsep                      -0.004436   0.184947  -0.024 0.980864    
+## day_of_weekmon                -0.192917   0.066881  -2.884 0.003921 ** 
+## day_of_weekthu                 0.126719   0.063936   1.982 0.047482 *  
+## day_of_weektue                 0.067674   0.066392   1.019 0.308057    
+## day_of_weekwed                 0.135806   0.065883   2.061 0.039274 *  
+## campaign                      -1.713327   0.556224  -3.080 0.002068 ** 
+## previous                      -0.509437   0.439766  -1.158 0.246690    
+## poutcomenonexistent            0.405841   0.098240   4.131 3.61e-05 ***
+## poutcomesuccess                0.669769   0.226484   2.957 0.003104 ** 
+## emp.var.rate                  -6.099827   0.696302  -8.760  &lt; 2e-16 ***
+## cons.price.idx                 4.362898   0.657077   6.640 3.14e-11 ***
+## cons.conf.idx                  0.495352   0.191588   2.586 0.009724 ** 
+## euribor3m                      1.192233   0.583176   2.044 0.040916 *  
+## nr.employed                    0.666441   0.834461   0.799 0.424494    
+## pdaysdummy                     1.194925   0.229844   5.199 2.01e-07 ***
+## age_range43.58                -0.014104   0.051169  -0.276 0.782823    
+## age_rangeOver.58               0.323387   0.110356   2.930 0.003385 ** 
+## age_rangeUnder.25              0.078393   0.097721   0.802 0.422433    
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## (Dispersion parameter for binomial family taken to be 1)
+## 
+##     Null deviance: 21865  on 31187  degrees of freedom
+## Residual deviance: 17170  on 31134  degrees of freedom
+## AIC: 17278
+## 
+## Number of Fisher Scoring iterations: 9</code></pre>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>log_pred_ME <span class="ot">&lt;-</span> <span class="fu">predict</span>(log_model_ME , log_test)</span></code></pre></div>
+<pre><code>## Warning in predict.lm(object, newdata, se.fit, scale = 1, type = if (type == :
+## prediction from a rank-deficient fit may be misleading</code></pre>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(caret)</span></code></pre></div>
+<pre><code>## Loading required package: ggplot2</code></pre>
+<pre><code>## Loading required package: lattice</code></pre>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">postResample</span>(log_pred_ME , log_test<span class="sc">$</span>yyes)</span></code></pre></div>
+<pre><code>##     RMSE Rsquared      MAE 
+## 2.796118 0.205816 2.653666</code></pre>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="co">#insert interactions</span></span></code></pre></div>
 </div>
 <div id="knn-model" class="section level1">
 <h1>KNN Model</h1>
