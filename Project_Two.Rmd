@@ -41,11 +41,11 @@ tele$pdays <- NULL
 
 
 #banding age into generational categories
-tele$age_range <- ifelse(tele$age <= 25 , "Under 25" ,
-                        ifelse(tele$age > 25 & tele$age <= 42, "26-42", 
-                               ifelse(tele$age > 42 & tele$age <= 58, "43-58", "Over 58")))
+#tele$age_range <- ifelse(tele$age <= 25 , "Under 25" ,
+                        #ifelse(tele$age > 25 & tele$age <= 42, "26-42", 
+                               #ifelse(tele$age > 42 & tele$age <= 58, "43-58", "Over 58")))
 
-tele$age <- NULL
+#tele$age <- NULL
 
 
 ```
@@ -108,18 +108,22 @@ tele_test_labels <- tele_norm[test_set, "yyes"]
 log_model_ME <- glm(yyes ~ . , data = log_train , family = "binomial")
 summary(log_model_ME)
 
-log_pred_ME <- predict(log_model_ME , log_test)
+log_pred_ME <- predict(log_model_ME , log_test , type = "response")
+
+log_pred_ME_binary <- ifelse(log_pred_ME >= 0.5, 1, 0)
+
 
 library(caret)
-postResample(log_pred_ME , log_test$yyes)
-
+confusionMatrix(as.factor(log_pred_ME_binary) , as.factor(log_test$yyes))
 ```
 
 
 ```{r}
 
 
-#insert interactions
+#log_model_interactions <- glm(yyes ~ . +  .^2 , data = log_train, family = "binomial")
+
+#summary(log_model_interactions)
 
 
 
@@ -142,7 +146,7 @@ CrossTable(knn_model , tele_test_labels)
 
 ```
 
-```{r probably meet}
+```{r probably delete}
 
 
 #tele_zscore <- as.data.frame(model.matrix(~.-1,tele))
@@ -163,9 +167,22 @@ CrossTable(knn_model , tele_test_labels)
 
 
 
-
-
 # ANN Model
+
+```{r}
+
+
+#library(neuralnet)
+#library(caret)
+
+#ann_model <- neuralnet(yyes ~ . , data = log_train, hidden = _______)
+
+
+
+
+```
+
+
 
 
 # Combining Models Together
