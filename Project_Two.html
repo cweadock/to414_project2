@@ -631,11 +631,11 @@ Regression</a></li>
 <span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="co">#banding age into generational categories</span></span>
-<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>tele<span class="sc">$</span>age_range <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(tele<span class="sc">$</span>age <span class="sc">&lt;=</span> <span class="dv">25</span> , <span class="st">&quot;Under 25&quot;</span> ,</span>
-<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>                        <span class="fu">ifelse</span>(tele<span class="sc">$</span>age <span class="sc">&gt;</span> <span class="dv">25</span> <span class="sc">&amp;</span> tele<span class="sc">$</span>age <span class="sc">&lt;=</span> <span class="dv">42</span>, <span class="st">&quot;26-42&quot;</span>, </span>
-<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>                               <span class="fu">ifelse</span>(tele<span class="sc">$</span>age <span class="sc">&gt;</span> <span class="dv">42</span> <span class="sc">&amp;</span> tele<span class="sc">$</span>age <span class="sc">&lt;=</span> <span class="dv">58</span>, <span class="st">&quot;43-58&quot;</span>, <span class="st">&quot;Over 58&quot;</span>)))</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="co">#tele$age_range &lt;- ifelse(tele$age &lt;= 25 , &quot;Under 25&quot; ,</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>                        <span class="co">#ifelse(tele$age &gt; 25 &amp; tele$age &lt;= 42, &quot;26-42&quot;, </span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>                               <span class="co">#ifelse(tele$age &gt; 42 &amp; tele$age &lt;= 58, &quot;43-58&quot;, &quot;Over 58&quot;)))</span></span>
 <span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>tele<span class="sc">$</span>age <span class="ot">&lt;-</span> <span class="cn">NULL</span></span></code></pre></div>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a><span class="co">#tele$age &lt;- NULL</span></span></code></pre></div>
 </div>
 <div id="getting-data-ready-for-analysis" class="section level2">
 <h2>Getting Data Ready for Analysis</h2>
@@ -644,7 +644,8 @@ Regression</a></li>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>telemm <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(<span class="fu">model.matrix</span>(<span class="sc">~</span>.<span class="sc">-</span><span class="dv">1</span>,tele))</span>
 <span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(telemm)</span></code></pre></div>
-<pre><code>## &#39;data.frame&#39;:    41188 obs. of  56 variables:
+<pre><code>## &#39;data.frame&#39;:    41188 obs. of  54 variables:
+##  $ age                         : num  56 57 37 40 56 45 59 41 24 25 ...
 ##  $ jobadmin.                   : num  0 0 0 1 0 0 1 0 0 0 ...
 ##  $ jobblue-collar              : num  0 0 0 0 0 0 0 1 0 0 ...
 ##  $ jobentrepreneur             : num  0 0 0 0 0 0 0 0 0 0 ...
@@ -697,10 +698,7 @@ Regression</a></li>
 ##  $ euribor3m                   : num  4.86 4.86 4.86 4.86 4.86 ...
 ##  $ nr.employed                 : num  5191 5191 5191 5191 5191 ...
 ##  $ yyes                        : num  0 0 0 0 0 0 0 0 0 0 ...
-##  $ pdaysdummy                  : num  0 0 0 0 0 0 0 0 0 0 ...
-##  $ age_range43-58              : num  1 1 0 0 1 1 0 0 0 0 ...
-##  $ age_rangeOver 58            : num  0 0 0 0 0 0 1 0 0 0 ...
-##  $ age_rangeUnder 25           : num  0 0 0 0 0 0 0 0 1 1 ...</code></pre>
+##  $ pdaysdummy                  : num  0 0 0 0 0 0 0 0 0 0 ...</code></pre>
 <div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Randomize the rows in the data (shuffling the rows)</span></span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">12345</span>)</span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>tele_random <span class="ot">&lt;-</span> telemm[<span class="fu">sample</span>(<span class="fu">nrow</span>(telemm)),]</span>
@@ -749,92 +747,179 @@ preference.</p>
 ## 
 ## Deviance Residuals: 
 ##     Min       1Q   Median       3Q      Max  
-## -2.0827  -0.3918  -0.3188  -0.2636   2.8942  
+## -2.0458  -0.3912  -0.3187  -0.2640   2.8845  
 ## 
 ## Coefficients: (2 not defined because of singularities)
 ##                                Estimate Std. Error z value Pr(&gt;|z|)    
-## (Intercept)                   -1.980381   0.524789  -3.774 0.000161 ***
-## jobadmin.                      0.027264   0.239122   0.114 0.909223    
-## jobblue.collar                -0.088788   0.241306  -0.368 0.712911    
-## jobentrepreneur               -0.057186   0.262887  -0.218 0.827795    
-## jobhousemaid                  -0.168017   0.272168  -0.617 0.537018    
-## jobmanagement                  0.028164   0.247715   0.114 0.909479    
-## jobretired                     0.042907   0.253831   0.169 0.865766    
-## jobself.employed               0.004050   0.259447   0.016 0.987546    
-## jobservices                   -0.094960   0.247082  -0.384 0.700736    
-## jobstudent                     0.209891   0.258638   0.812 0.417065    
-## jobtechnician                  0.022422   0.241945   0.093 0.926161    
-## jobunemployed                  0.078710   0.263004   0.299 0.764732    
+## (Intercept)                  -1.927e+00  5.281e-01  -3.648 0.000265 ***
+## age                           1.209e-02  1.985e-01   0.061 0.951444    
+## jobadmin.                    -9.320e-03  2.380e-01  -0.039 0.968760    
+## jobblue.collar               -1.312e-01  2.401e-01  -0.546 0.584903    
+## jobentrepreneur              -9.396e-02  2.618e-01  -0.359 0.719619    
+## jobhousemaid                 -1.655e-01  2.706e-01  -0.611 0.540883    
+## jobmanagement                -8.239e-03  2.465e-01  -0.033 0.973337    
+## jobretired                    2.096e-01  2.498e-01   0.839 0.401260    
+## jobself.employed             -3.002e-02  2.584e-01  -0.116 0.907521    
+## jobservices                  -1.330e-01  2.460e-01  -0.541 0.588583    
+## jobstudent                    1.951e-01  2.558e-01   0.763 0.445646    
+## jobtechnician                -1.704e-02  2.407e-01  -0.071 0.943588    
+## jobunemployed                 3.640e-02  2.619e-01   0.139 0.889486    
 ## jobunknown                           NA         NA      NA       NA    
-## maritalmarried                -0.002442   0.068703  -0.036 0.971648    
-## maritalsingle                  0.068965   0.076900   0.897 0.369816    
-## maritalunknown                 0.145411   0.435634   0.334 0.738536    
-## educationbasic.6y              0.270789   0.119199   2.272 0.023102 *  
-## educationbasic.9y              0.092869   0.096074   0.967 0.333720    
-## educationhigh.school           0.105561   0.093887   1.124 0.260866    
-## educationilliterate            0.285863   0.879193   0.325 0.745073    
-## educationprofessional.course   0.130792   0.103084   1.269 0.204516    
-## educationuniversity.degree     0.197298   0.094135   2.096 0.036091 *  
-## educationunknown               0.206119   0.121594   1.695 0.090050 .  
-## defaultunknown                -0.282074   0.066889  -4.217 2.48e-05 ***
-## defaultyes                    -7.498194 119.468156  -0.063 0.949955    
-## housingunknown                -0.130678   0.141571  -0.923 0.355977    
-## housingyes                    -0.045211   0.041485  -1.090 0.275795    
+## maritalmarried                5.118e-05  6.877e-02   0.001 0.999406    
+## maritalsingle                 6.881e-02  7.832e-02   0.879 0.379607    
+## maritalunknown                1.379e-01  4.358e-01   0.316 0.751746    
+## educationbasic.6y             2.482e-01  1.188e-01   2.089 0.036713 *  
+## educationbasic.9y             7.399e-02  9.586e-02   0.772 0.440186    
+## educationhigh.school          8.348e-02  9.374e-02   0.891 0.373172    
+## educationilliterate           2.135e-01  8.776e-01   0.243 0.807803    
+## educationprofessional.course  1.113e-01  1.029e-01   1.082 0.279343    
+## educationuniversity.degree    1.710e-01  9.389e-02   1.822 0.068499 .  
+## educationunknown              2.089e-01  1.210e-01   1.726 0.084358 .  
+## defaultunknown               -2.861e-01  6.681e-02  -4.282 1.85e-05 ***
+## defaultyes                   -7.488e+00  1.195e+02  -0.063 0.950023    
+## housingunknown               -1.324e-01  1.416e-01  -0.935 0.349727    
+## housingyes                   -4.456e-02  4.147e-02  -1.074 0.282635    
 ## loanunknown                          NA         NA      NA       NA    
-## loanyes                        0.028853   0.056700   0.509 0.610839    
-## contacttelephone              -0.638289   0.076096  -8.388  &lt; 2e-16 ***
-## monthaug                       0.373946   0.125406   2.982 0.002865 ** 
-## monthdec                       0.375967   0.215859   1.742 0.081557 .  
-## monthjul                       0.053385   0.095900   0.557 0.577746    
-## monthjun                      -0.547474   0.130014  -4.211 2.54e-05 ***
-## monthmar                       1.344401   0.149868   8.971  &lt; 2e-16 ***
-## monthmay                      -0.481211   0.083764  -5.745 9.20e-09 ***
-## monthnov                      -0.456552   0.121018  -3.773 0.000162 ***
-## monthoct                      -0.017396   0.157471  -0.110 0.912037    
-## monthsep                      -0.004436   0.184947  -0.024 0.980864    
-## day_of_weekmon                -0.192917   0.066881  -2.884 0.003921 ** 
-## day_of_weekthu                 0.126719   0.063936   1.982 0.047482 *  
-## day_of_weektue                 0.067674   0.066392   1.019 0.308057    
-## day_of_weekwed                 0.135806   0.065883   2.061 0.039274 *  
-## campaign                      -1.713327   0.556224  -3.080 0.002068 ** 
-## previous                      -0.509437   0.439766  -1.158 0.246690    
-## poutcomenonexistent            0.405841   0.098240   4.131 3.61e-05 ***
-## poutcomesuccess                0.669769   0.226484   2.957 0.003104 ** 
-## emp.var.rate                  -6.099827   0.696302  -8.760  &lt; 2e-16 ***
-## cons.price.idx                 4.362898   0.657077   6.640 3.14e-11 ***
-## cons.conf.idx                  0.495352   0.191588   2.586 0.009724 ** 
-## euribor3m                      1.192233   0.583176   2.044 0.040916 *  
-## nr.employed                    0.666441   0.834461   0.799 0.424494    
-## pdaysdummy                     1.194925   0.229844   5.199 2.01e-07 ***
-## age_range43.58                -0.014104   0.051169  -0.276 0.782823    
-## age_rangeOver.58               0.323387   0.110356   2.930 0.003385 ** 
-## age_rangeUnder.25              0.078393   0.097721   0.802 0.422433    
+## loanyes                       2.758e-02  5.666e-02   0.487 0.626447    
+## contacttelephone             -6.385e-01  7.613e-02  -8.388  &lt; 2e-16 ***
+## monthaug                      3.849e-01  1.253e-01   3.072 0.002126 ** 
+## monthdec                      3.909e-01  2.158e-01   1.811 0.070082 .  
+## monthjul                      6.030e-02  9.588e-02   0.629 0.529406    
+## monthjun                     -5.547e-01  1.300e-01  -4.266 1.99e-05 ***
+## monthmar                      1.357e+00  1.497e-01   9.065  &lt; 2e-16 ***
+## monthmay                     -4.829e-01  8.368e-02  -5.771 7.90e-09 ***
+## monthnov                     -4.571e-01  1.209e-01  -3.781 0.000156 ***
+## monthoct                     -3.188e-03  1.572e-01  -0.020 0.983822    
+## monthsep                      7.160e-03  1.848e-01   0.039 0.969087    
+## day_of_weekmon               -1.917e-01  6.684e-02  -2.867 0.004139 ** 
+## day_of_weekthu                1.287e-01  6.390e-02   2.015 0.043952 *  
+## day_of_weektue                6.815e-02  6.636e-02   1.027 0.304411    
+## day_of_weekwed                1.378e-01  6.587e-02   2.092 0.036422 *  
+## campaign                     -1.697e+00  5.556e-01  -3.055 0.002250 ** 
+## previous                     -5.110e-01  4.394e-01  -1.163 0.244771    
+## poutcomenonexistent           4.029e-01  9.815e-02   4.105 4.04e-05 ***
+## poutcomesuccess               6.802e-01  2.264e-01   3.005 0.002658 ** 
+## emp.var.rate                 -6.154e+00  6.958e-01  -8.844  &lt; 2e-16 ***
+## cons.price.idx                4.410e+00  6.569e-01   6.714 1.89e-11 ***
+## cons.conf.idx                 5.168e-01  1.917e-01   2.696 0.007010 ** 
+## euribor3m                     1.178e+00  5.830e-01   2.021 0.043242 *  
+## nr.employed                   6.864e-01  8.344e-01   0.823 0.410688    
+## pdaysdummy                    1.184e+00  2.297e-01   5.154 2.56e-07 ***
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
 ## 
 ## (Dispersion parameter for binomial family taken to be 1)
 ## 
 ##     Null deviance: 21865  on 31187  degrees of freedom
-## Residual deviance: 17170  on 31134  degrees of freedom
-## AIC: 17278
+## Residual deviance: 17181  on 31136  degrees of freedom
+## AIC: 17285
 ## 
 ## Number of Fisher Scoring iterations: 9</code></pre>
-<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>log_pred_ME <span class="ot">&lt;-</span> <span class="fu">predict</span>(log_model_ME , log_test)</span></code></pre></div>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>log_pred_ME <span class="ot">&lt;-</span> <span class="fu">predict</span>(log_model_ME , log_test , <span class="at">type =</span> <span class="st">&quot;response&quot;</span>)</span></code></pre></div>
 <pre><code>## Warning in predict.lm(object, newdata, se.fit, scale = 1, type = if (type == :
 ## prediction from a rank-deficient fit may be misleading</code></pre>
-<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(caret)</span></code></pre></div>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>log_pred_ME_binary <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(log_pred_ME <span class="sc">&gt;=</span> <span class="fl">0.5</span>, <span class="dv">1</span>, <span class="dv">0</span>)</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(caret)</span></code></pre></div>
 <pre><code>## Loading required package: ggplot2</code></pre>
 <pre><code>## Loading required package: lattice</code></pre>
-<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">postResample</span>(log_pred_ME , log_test<span class="sc">$</span>yyes)</span></code></pre></div>
-<pre><code>##     RMSE Rsquared      MAE 
-## 2.796118 0.205816 2.653666</code></pre>
-<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="co">#insert interactions</span></span></code></pre></div>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">confusionMatrix</span>(<span class="fu">as.factor</span>(log_pred_ME_binary) , <span class="fu">as.factor</span>(log_test<span class="sc">$</span>yyes))</span></code></pre></div>
+<pre><code>## Confusion Matrix and Statistics
+## 
+##           Reference
+## Prediction    0    1
+##          0 8728  897
+##          1  123  252
+##                                           
+##                Accuracy : 0.898           
+##                  95% CI : (0.8919, 0.9039)
+##     No Information Rate : 0.8851          
+##     P-Value [Acc &gt; NIR] : 2.119e-05       
+##                                           
+##                   Kappa : 0.2906          
+##                                           
+##  Mcnemar&#39;s Test P-Value : &lt; 2.2e-16       
+##                                           
+##             Sensitivity : 0.9861          
+##             Specificity : 0.2193          
+##          Pos Pred Value : 0.9068          
+##          Neg Pred Value : 0.6720          
+##              Prevalence : 0.8851          
+##          Detection Rate : 0.8728          
+##    Detection Prevalence : 0.9625          
+##       Balanced Accuracy : 0.6027          
+##                                           
+##        &#39;Positive&#39; Class : 0               
+## </code></pre>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="co">#log_model_interactions &lt;- glm(yyes ~ . +  .^2 , data = log_train, family = &quot;binomial&quot;)</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="co">#summary(log_model_interactions)</span></span></code></pre></div>
 </div>
 <div id="knn-model" class="section level1">
 <h1>KNN Model</h1>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(class)</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>knn_model <span class="ot">&lt;-</span> <span class="fu">knn</span>(tele_train , tele_test , <span class="at">cl =</span> tele_train_labels, <span class="at">k =</span> <span class="dv">10</span>)</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(gmodels)</span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a><span class="fu">CrossTable</span>(knn_model , tele_test_labels)</span></code></pre></div>
+<pre><code>## 
+##  
+##    Cell Contents
+## |-------------------------|
+## |                       N |
+## | Chi-square contribution |
+## |           N / Row Total |
+## |           N / Col Total |
+## |         N / Table Total |
+## |-------------------------|
+## 
+##  
+## Total Observations in Table:  10000 
+## 
+##  
+##              | tele_test_labels 
+##    knn_model |         0 |         1 | Row Total | 
+## -------------|-----------|-----------|-----------|
+##            0 |      8684 |       906 |      9590 | 
+##              |     4.521 |    34.825 |           | 
+##              |     0.906 |     0.094 |     0.959 | 
+##              |     0.981 |     0.789 |           | 
+##              |     0.868 |     0.091 |           | 
+## -------------|-----------|-----------|-----------|
+##            1 |       167 |       243 |       410 | 
+##              |   105.743 |   814.564 |           | 
+##              |     0.407 |     0.593 |     0.041 | 
+##              |     0.019 |     0.211 |           | 
+##              |     0.017 |     0.024 |           | 
+## -------------|-----------|-----------|-----------|
+## Column Total |      8851 |      1149 |     10000 | 
+##              |     0.885 |     0.115 |           | 
+## -------------|-----------|-----------|-----------|
+## 
+## </code></pre>
+<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="co">#tele_zscore &lt;- as.data.frame(model.matrix(~.-1,tele))</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a><span class="co">#tele_train_zscore &lt;- tele_zscore[-test_set, -match(&quot;yyes&quot;,names(tele_norm))]</span></span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a><span class="co">#tele_test_zscore &lt;- tele_zscore[test_set, -match(&quot;yyes&quot;,names(tele_norm))]</span></span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a><span class="co">#tele_train_labels_zscore &lt;- tele_norm[-test_set, &quot;yyes&quot;]</span></span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a><span class="co">#tele_test_labels_zscore &lt;- tele_norm[test_set, &quot;yyes&quot;]</span></span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a><span class="co">#knn_zscore &lt;- knn(tele_train_zscore, tele_test_zscore, cl = tele_train_labels_zscore, k = 20)</span></span>
+<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-13"><a href="#cb20-13" aria-hidden="true" tabindex="-1"></a><span class="co">#CrossTable(knn_zscore , tele_test_labels_zscore)</span></span></code></pre></div>
 </div>
 <div id="ann-model" class="section level1">
 <h1>ANN Model</h1>
+<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="co">#library(neuralnet)</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a><span class="co">#library(caret)</span></span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a><span class="co">#ann_model &lt;- neuralnet(yyes ~ . , data = log_train, hidden = _______)</span></span></code></pre></div>
 </div>
 <div id="combining-models-together" class="section level1">
 <h1>Combining Models Together</h1>
