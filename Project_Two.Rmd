@@ -24,7 +24,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Downloading and Prepping the Data
 
-```{r, eval=FALSE}
+```{r}
 #Downloading and Prepping the Data
 tele <- read.csv("tele.csv", stringsAsFactors = TRUE)
 summary(tele)
@@ -95,10 +95,10 @@ tele_test <- tele_norm[test_set, -match("yyes",names(tele_norm))]
 #Now the response (aka Labels) - only the yyes column
 tele_train_labels <- tele_norm[-test_set, "yyes"]
 tele_test_labels <- tele_norm[test_set, "yyes"]
-write.csv(tele_train, "tele_train.csv")
-```
 
-> Now you are ready to build your ANN model. Feel free to modify the data load, cleaning and preparation code above as per your preference.
+# can use write.csv to put all of our new data sets into seperate, cleaned csv
+#write.csv(tele_train, "tele_train.csv")
+```
 
 
 # Logistic Regression
@@ -111,31 +111,17 @@ log_model_ME <- glm(yyes ~ . , data = log_train , family = "binomial")
 
 #summary(log_model_test)
 
-log_test_ste
-
 summary(log_model_ME)
 
 log_pred_ME <- predict(log_model_ME , log_test , type = "response")
 
-log_pred_ME_binary <- ifelse(log_pred_ME >= 0.5, 1, 0)
+log_pred_ME_binary <- ifelse(log_pred_ME >= 0.15, 1, 0) # have to find the right threshold here; may be useful to find break even rates
 
 
 library(caret)
-confusionMatrix(as.factor(log_pred_ME_binary) , as.factor(log_test$yyes))
+confusionMatrix(as.factor(log_pred_ME_binary) , as.factor(log_test$yyes), positive = "1")
 ```
 
-
-```{r}
-
-
-#log_model_interactions <- glm(yyes ~ . +  .^2 , data = log_train, family = "binomial")
-
-#summary(log_model_interactions)
-
-
-
-
-```
 
 
 
@@ -147,8 +133,8 @@ library(class)
 
 knn_model <- knn(tele_train , tele_test , cl = tele_train_labels, k = 10)
 
-saveRDS(knn_model, "testfile.rds")
-
+#saveRDS(knn_model, "testfile.rds")
+# above is the example he gave to save the model to a file such that it doesnt run many times
 
 library(gmodels)
 
@@ -156,24 +142,6 @@ CrossTable(knn_model , tele_test_labels)
 
 ```
 
-```{r probably delete}
-
-
-#tele_zscore <- as.data.frame(model.matrix(~.-1,tele))
-
-#tele_train_zscore <- tele_zscore[-test_set, -match("yyes",names(tele_norm))]
-#tele_test_zscore <- tele_zscore[test_set, -match("yyes",names(tele_norm))]
-
-#tele_train_labels_zscore <- tele_norm[-test_set, "yyes"]
-#tele_test_labels_zscore <- tele_norm[test_set, "yyes"]
-
-
-#knn_zscore <- knn(tele_train_zscore, tele_test_zscore, cl = tele_train_labels_zscore, k = 20)
-
-
-#CrossTable(knn_zscore , tele_test_labels_zscore)
-
-```
 
 
 
