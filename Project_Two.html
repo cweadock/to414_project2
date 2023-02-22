@@ -566,6 +566,11 @@ Regression</a></li>
 <div id="intro" class="section level1">
 <h1>Intro</h1>
 <p>[insert intro]</p>
+<ul>
+<li>current success rate = 11.26%</li>
+<li>current profit = -13,348</li>
+<li>break even success rate = 16.667%</li>
+</ul>
 <div id="downloading-and-prepping-the-data" class="section level2">
 <h2>Downloading and Prepping the Data</h2>
 <div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Downloading and Prepping the Data</span></span>
@@ -635,15 +640,19 @@ Regression</a></li>
 <span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>                        <span class="co">#ifelse(tele$age &gt; 25 &amp; tele$age &lt;= 42, &quot;26-42&quot;, </span></span>
 <span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>                               <span class="co">#ifelse(tele$age &gt; 42 &amp; tele$age &lt;= 58, &quot;43-58&quot;, &quot;Over 58&quot;)))</span></span>
 <span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a><span class="co">#tele$age &lt;- NULL</span></span></code></pre></div>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a><span class="co">#tele$age &lt;- NULL</span></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(tele<span class="sc">$</span>y)</span></code></pre></div>
+<pre><code>##    no   yes 
+## 36548  4640</code></pre>
 </div>
 <div id="getting-data-ready-for-analysis" class="section level2">
 <h2>Getting Data Ready for Analysis</h2>
-<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Using model.matrix to convert all the factors to dummy variables</span></span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="co"># We are converting all of the factors into dummy variables as the input into knn has to be numeric</span></span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>telemm <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(<span class="fu">model.matrix</span>(<span class="sc">~</span>.<span class="sc">-</span><span class="dv">1</span>,tele))</span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(telemm)</span></code></pre></div>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Using model.matrix to convert all the factors to dummy variables</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="co"># We are converting all of the factors into dummy variables as the input into knn has to be numeric</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>telemm <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(<span class="fu">model.matrix</span>(<span class="sc">~</span>.<span class="sc">-</span><span class="dv">1</span>,tele))</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(telemm)</span></code></pre></div>
 <pre><code>## &#39;data.frame&#39;:    41188 obs. of  54 variables:
 ##  $ age                         : num  56 57 37 40 56 45 59 41 24 25 ...
 ##  $ jobadmin.                   : num  0 0 0 1 0 0 1 0 0 0 ...
@@ -699,51 +708,52 @@ Regression</a></li>
 ##  $ nr.employed                 : num  5191 5191 5191 5191 5191 ...
 ##  $ yyes                        : num  0 0 0 0 0 0 0 0 0 0 ...
 ##  $ pdaysdummy                  : num  0 0 0 0 0 0 0 0 0 0 ...</code></pre>
-<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Randomize the rows in the data (shuffling the rows)</span></span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">12345</span>)</span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>tele_random <span class="ot">&lt;-</span> telemm[<span class="fu">sample</span>(<span class="fu">nrow</span>(telemm)),]</span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="co">#Normalize the data</span></span>
-<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>normalize <span class="ot">&lt;-</span> <span class="cf">function</span>(x) {</span>
-<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span> ((x <span class="sc">-</span> <span class="fu">min</span>(x)) <span class="sc">/</span> (<span class="fu">max</span>(x) <span class="sc">-</span> <span class="fu">min</span>(x)))</span>
-<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a><span class="co"># we are going to normalize everything </span></span>
-<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>tele_norm <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(<span class="fu">lapply</span>(tele_random, normalize))</span></code></pre></div>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Randomize the rows in the data (shuffling the rows)</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">12345</span>)</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>tele_random <span class="ot">&lt;-</span> telemm[<span class="fu">sample</span>(<span class="fu">nrow</span>(telemm)),]</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="co">#Normalize the data</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>normalize <span class="ot">&lt;-</span> <span class="cf">function</span>(x) {</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span> ((x <span class="sc">-</span> <span class="fu">min</span>(x)) <span class="sc">/</span> (<span class="fu">max</span>(x) <span class="sc">-</span> <span class="fu">min</span>(x)))</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a><span class="co"># we are going to normalize everything </span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>tele_norm <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(<span class="fu">lapply</span>(tele_random, normalize))</span></code></pre></div>
 </div>
 <div id="getting-train-and-test-samples" class="section level2">
 <h2>Getting Train and Test Samples</h2>
-<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Selects 10000 random rows for test data</span></span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">12345</span>)</span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>test_set <span class="ot">&lt;-</span> <span class="fu">sample</span>(<span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(tele_norm), <span class="dv">10000</span>) </span>
-<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Depending on R-version and computer, different rows may be selected. </span></span>
-<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="co"># If that happens, results are different. </span></span>
-<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>log_train <span class="ot">&lt;-</span> tele_norm[ <span class="sc">-</span>test_set, ]</span>
-<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>log_test <span class="ot">&lt;-</span> tele_norm[ test_set , ]</span>
-<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Create a train set and test set</span></span>
-<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a><span class="co">#First the predictors - all columns except the yyes column</span></span>
-<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>tele_train <span class="ot">&lt;-</span> tele_norm[<span class="sc">-</span>test_set, <span class="sc">-</span><span class="fu">match</span>(<span class="st">&quot;yyes&quot;</span>,<span class="fu">names</span>(tele_norm))]</span>
-<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>tele_test <span class="ot">&lt;-</span> tele_norm[test_set, <span class="sc">-</span><span class="fu">match</span>(<span class="st">&quot;yyes&quot;</span>,<span class="fu">names</span>(tele_norm))]</span>
-<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a><span class="co">#Now the response (aka Labels) - only the yyes column</span></span>
-<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>tele_train_labels <span class="ot">&lt;-</span> tele_norm[<span class="sc">-</span>test_set, <span class="st">&quot;yyes&quot;</span>]</span>
-<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>tele_test_labels <span class="ot">&lt;-</span> tele_norm[test_set, <span class="st">&quot;yyes&quot;</span>]</span>
-<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a><span class="co"># can use write.csv to put all of our new data sets into seperate, cleaned csv</span></span>
-<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a><span class="co">#write.csv(tele_train, &quot;tele_train.csv&quot;)</span></span></code></pre></div>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Selects 10000 random rows for test data</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">12345</span>)</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>test_set <span class="ot">&lt;-</span> <span class="fu">sample</span>(<span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(tele_norm), <span class="dv">10000</span>) </span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Depending on R-version and computer, different rows may be selected. </span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="co"># If that happens, results are different. </span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>log_train <span class="ot">&lt;-</span> tele_norm[ <span class="sc">-</span>test_set, ]</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>log_test <span class="ot">&lt;-</span> tele_norm[ test_set , ]</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Create a train set and test set</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a><span class="co">#First the predictors - all columns except the yyes column</span></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>tele_train <span class="ot">&lt;-</span> tele_norm[<span class="sc">-</span>test_set, <span class="sc">-</span><span class="fu">match</span>(<span class="st">&quot;yyes&quot;</span>,<span class="fu">names</span>(tele_norm))]</span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>tele_test <span class="ot">&lt;-</span> tele_norm[test_set, <span class="sc">-</span><span class="fu">match</span>(<span class="st">&quot;yyes&quot;</span>,<span class="fu">names</span>(tele_norm))]</span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a><span class="co">#Now the response (aka Labels) - only the yyes column</span></span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>tele_train_labels <span class="ot">&lt;-</span> tele_norm[<span class="sc">-</span>test_set, <span class="st">&quot;yyes&quot;</span>]</span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>tele_test_labels <span class="ot">&lt;-</span> tele_norm[test_set, <span class="st">&quot;yyes&quot;</span>]</span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a><span class="co"># can use write.csv to put all of our new data sets into seperate, cleaned csv</span></span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a><span class="co">#write.csv(tele_train, &quot;tele_train.csv&quot;)</span></span></code></pre></div>
 </div>
 </div>
 <div id="logistic-regression" class="section level1">
 <h1>Logistic Regression</h1>
-<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>log_model_ME <span class="ot">&lt;-</span> <span class="fu">glm</span>(yyes <span class="sc">~</span> . , <span class="at">data =</span> log_train , <span class="at">family =</span> <span class="st">&quot;binomial&quot;</span>)</span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="co">#log_model_test &lt;- glm(yyes ~ . + .*., data = log_train , family = &quot;binomial&quot;)</span></span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="co">#summary(log_model_test)</span></span>
-<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(log_model_ME)</span></code></pre></div>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>log_model_ME <span class="ot">&lt;-</span> <span class="fu">glm</span>(yyes <span class="sc">~</span> . , <span class="at">data =</span> log_train , <span class="at">family =</span> <span class="st">&quot;binomial&quot;</span>)</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="co">#below is code prof gave if we want to do all interactions and step function but may not be worth it because regression not precise</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="co">#log_model_test &lt;- glm(yyes ~ . + .*., data = log_train , family = &quot;binomial&quot;)</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="co">#summary(log_model_test)</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(log_model_ME)</span></code></pre></div>
 <pre><code>## 
 ## Call:
 ## glm(formula = yyes ~ ., family = &quot;binomial&quot;, data = log_train)
@@ -818,16 +828,16 @@ Regression</a></li>
 ## AIC: 17285
 ## 
 ## Number of Fisher Scoring iterations: 9</code></pre>
-<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>log_pred_ME <span class="ot">&lt;-</span> <span class="fu">predict</span>(log_model_ME , log_test , <span class="at">type =</span> <span class="st">&quot;response&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>log_pred_ME <span class="ot">&lt;-</span> <span class="fu">predict</span>(log_model_ME , log_test , <span class="at">type =</span> <span class="st">&quot;response&quot;</span>)</span></code></pre></div>
 <pre><code>## Warning in predict.lm(object, newdata, se.fit, scale = 1, type = if (type == :
 ## prediction from a rank-deficient fit may be misleading</code></pre>
-<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>log_pred_ME_binary <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(log_pred_ME <span class="sc">&gt;=</span> <span class="fl">0.15</span>, <span class="dv">1</span>, <span class="dv">0</span>) <span class="co"># have to find the right threshold here; may be useful to find break even rates</span></span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(caret)</span></code></pre></div>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>log_pred_ME_binary <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(log_pred_ME <span class="sc">&gt;=</span> <span class="fl">0.15</span>, <span class="dv">1</span>, <span class="dv">0</span>) <span class="co"># have to find the right threshold here; may be useful to find break even rates</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(caret)</span></code></pre></div>
 <pre><code>## Loading required package: ggplot2</code></pre>
 <pre><code>## Loading required package: lattice</code></pre>
-<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">confusionMatrix</span>(<span class="fu">as.factor</span>(log_pred_ME_binary) , <span class="fu">as.factor</span>(log_test<span class="sc">$</span>yyes), <span class="at">positive =</span> <span class="st">&quot;1&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">confusionMatrix</span>(<span class="fu">as.factor</span>(log_pred_ME_binary) , <span class="fu">as.factor</span>(log_test<span class="sc">$</span>yyes), <span class="at">positive =</span> <span class="st">&quot;1&quot;</span>)</span></code></pre></div>
 <pre><code>## Confusion Matrix and Statistics
 ## 
 ##           Reference
@@ -858,16 +868,16 @@ Regression</a></li>
 </div>
 <div id="knn-model" class="section level1">
 <h1>KNN Model</h1>
-<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(class)</span>
-<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>knn_model <span class="ot">&lt;-</span> <span class="fu">knn</span>(tele_train , tele_test , <span class="at">cl =</span> tele_train_labels, <span class="at">k =</span> <span class="dv">10</span>)</span>
-<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a><span class="co">#saveRDS(knn_model, &quot;testfile.rds&quot;)</span></span>
-<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a><span class="co"># above is the example he gave to save the model to a file such that it doesnt run many times</span></span>
-<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(gmodels)</span>
-<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a><span class="fu">CrossTable</span>(knn_model , tele_test_labels)</span></code></pre></div>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(class)</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>knn_model <span class="ot">&lt;-</span> <span class="fu">knn</span>(tele_train , tele_test , <span class="at">cl =</span> tele_train_labels, <span class="at">k =</span> <span class="dv">1</span>)</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a><span class="co">#saveRDS(knn_model, &quot;testfile.rds&quot;)</span></span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a><span class="co"># above is the example he gave to save the model to a file such that it doesnt run many times</span></span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(gmodels)</span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a><span class="fu">CrossTable</span>(knn_model , tele_test_labels)</span></code></pre></div>
 <pre><code>## 
 ##  
 ##    Cell Contents
@@ -886,36 +896,49 @@ Regression</a></li>
 ##              | tele_test_labels 
 ##    knn_model |         0 |         1 | Row Total | 
 ## -------------|-----------|-----------|-----------|
-##            0 |      8684 |       906 |      9590 | 
-##              |     4.521 |    34.825 |           | 
-##              |     0.906 |     0.094 |     0.959 | 
-##              |     0.981 |     0.789 |           | 
-##              |     0.868 |     0.091 |           | 
+##            0 |      8089 |       785 |      8874 | 
+##              |     7.009 |    53.988 |           | 
+##              |     0.912 |     0.088 |     0.887 | 
+##              |     0.914 |     0.683 |           | 
+##              |     0.809 |     0.079 |           | 
 ## -------------|-----------|-----------|-----------|
-##            1 |       167 |       243 |       410 | 
-##              |   105.743 |   814.564 |           | 
-##              |     0.407 |     0.593 |     0.041 | 
-##              |     0.019 |     0.211 |           | 
-##              |     0.017 |     0.024 |           | 
+##            1 |       762 |       364 |      1126 | 
+##              |    55.234 |   425.482 |           | 
+##              |     0.677 |     0.323 |     0.113 | 
+##              |     0.086 |     0.317 |           | 
+##              |     0.076 |     0.036 |           | 
 ## -------------|-----------|-----------|-----------|
 ## Column Total |      8851 |      1149 |     10000 | 
 ##              |     0.885 |     0.115 |           | 
 ## -------------|-----------|-----------|-----------|
 ## 
 ## </code></pre>
+<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="co">#This is the code for how to retrieve model from RDS file for prediction</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a><span class="co">#knn_test &lt;- readRDS(&quot;testfile.rds&quot;)</span></span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a><span class="co">#library(gmodels)</span></span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a><span class="co">#CrossTable(knn_test , tele_test_labels)</span></span></code></pre></div>
 </div>
 <div id="ann-model" class="section level1">
 <h1>ANN Model</h1>
-<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="co">#library(neuralnet)</span></span>
-<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="co">#library(caret)</span></span>
-<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a><span class="co">#ann_model &lt;- neuralnet(yyes ~ . , data = log_train, hidden = _______)</span></span></code></pre></div>
+<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="co">#library(neuralnet)</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a><span class="co">#library(caret)</span></span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a><span class="co">#ann_model &lt;- neuralnet(yyes ~ . , data = log_train, hidden = _______)</span></span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a><span class="co"># do 1 hidden, then 5, then 20 if possible</span></span></code></pre></div>
 </div>
 <div id="combining-models-together" class="section level1">
 <h1>Combining Models Together</h1>
 </div>
 <div id="results-and-analysis" class="section level1">
 <h1>Results and Analysis</h1>
+<p>we should look at the profit from each model individual and combined
+and compare to best</p>
 </div>
 <div id="conclusion" class="section level1">
 <h1>Conclusion</h1>

@@ -22,6 +22,11 @@ knitr::opts_chunk$set(echo = TRUE)
 
 [insert intro]
 
+- current success rate = 11.26%
+- current profit = -13,348
+- break even success rate = 16.667%
+
+
 ## Downloading and Prepping the Data
 
 ```{r}
@@ -47,6 +52,7 @@ tele$pdays <- NULL
 
 #tele$age <- NULL
 
+summary(tele$y)
 
 ```
 
@@ -107,8 +113,9 @@ tele_test_labels <- tele_norm[test_set, "yyes"]
 
 log_model_ME <- glm(yyes ~ . , data = log_train , family = "binomial")
 
-#log_model_test <- glm(yyes ~ . + .*., data = log_train , family = "binomial")
 
+#below is code prof gave if we want to do all interactions and step function but may not be worth it because regression not precise
+#log_model_test <- glm(yyes ~ . + .*., data = log_train , family = "binomial")
 #summary(log_model_test)
 
 summary(log_model_ME)
@@ -131,7 +138,7 @@ confusionMatrix(as.factor(log_pred_ME_binary) , as.factor(log_test$yyes), positi
 
 library(class)
 
-knn_model <- knn(tele_train , tele_test , cl = tele_train_labels, k = 10)
+knn_model <- knn(tele_train , tele_test , cl = tele_train_labels, k = 1)
 
 #saveRDS(knn_model, "testfile.rds")
 # above is the example he gave to save the model to a file such that it doesnt run many times
@@ -142,6 +149,20 @@ CrossTable(knn_model , tele_test_labels)
 
 ```
 
+```{r}
+
+#This is the code for how to retrieve model from RDS file for prediction
+
+
+#knn_test <- readRDS("testfile.rds")
+
+#library(gmodels)
+
+
+#CrossTable(knn_test , tele_test_labels)
+
+
+```
 
 
 
@@ -155,7 +176,7 @@ CrossTable(knn_model , tele_test_labels)
 
 #ann_model <- neuralnet(yyes ~ . , data = log_train, hidden = _______)
 
-
+# do 1 hidden, then 5, then 20 if possible
 
 
 ```
@@ -167,6 +188,8 @@ CrossTable(knn_model , tele_test_labels)
 
 
 # Results and Analysis
+
+we should look at the profit from each model individual and combined and compare to best
 
 
 # Conclusion
