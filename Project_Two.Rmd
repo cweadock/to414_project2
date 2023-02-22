@@ -14,6 +14,20 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+# Delegating remaining work:
+
+- find log reg threshold: **Rubens**
+- best k value for knn(add code for optimization): **claire**
+- hidden value for ann: **kate**
+- run models and save to rds: **Kate**
+- intro: **anna and liv**
+- exec summary: **anna and liv**
+- conclusion: **mike**
+- results & financial analysis: **mike**
+- combine models: **kate**
+- write explanations under headers explaining the code we did: **claire**
+
+
 # Executive Summary
 
 [insert exec summary]
@@ -21,6 +35,8 @@ knitr::opts_chunk$set(echo = TRUE)
 # Intro
 
 [insert intro]
+
+- introduce problem and process to solve
 
 - current success rate = 11.26%
 - current profit = -13,348
@@ -52,7 +68,7 @@ tele$pdays <- NULL
 
 #tele$age <- NULL
 
-summary(tele$y)
+summary(tele$y) # useful for calls and success rates and profits
 
 ```
 
@@ -138,7 +154,7 @@ confusionMatrix(as.factor(log_pred_ME_binary) , as.factor(log_test$yyes), positi
 
 library(class)
 
-knn_model <- knn(tele_train , tele_test , cl = tele_train_labels, k = 1)
+knn_model <- knn(tele_train , tele_test , cl = tele_train_labels, k = 1) #still need to figure out best k
 
 #saveRDS(knn_model, "testfile.rds")
 # above is the example he gave to save the model to a file such that it doesnt run many times
@@ -171,10 +187,10 @@ CrossTable(knn_model , tele_test_labels)
 ```{r}
 
 
-#library(neuralnet)
-#library(caret)
+library(neuralnet)
+library(caret)
 
-#ann_model <- neuralnet(yyes ~ . , data = log_train, hidden = _______)
+#ann_model_1hidden <- neuralnet(yyes ~ . , data = log_train, hidden = 1)
 
 # do 1 hidden, then 5, then 20 if possible
 
@@ -192,4 +208,7 @@ CrossTable(knn_model , tele_test_labels)
 we should look at the profit from each model individual and combined and compare to best
 
 
+- make sure to talk about favoring false pos over false neg because get 6 in revenue compared to 1 cost
+
 # Conclusion
+
