@@ -165,38 +165,47 @@ CrossTable(knn_model , tele_test_labels)
 
 ```
 
-```{r}
 
-#This is the code for how to retrieve model from RDS file for prediction
-
-
-#knn_test <- readRDS("testfile.rds")
-
-#library(gmodels)
-
-
-#CrossTable(knn_test , tele_test_labels)
-
-
-```
 
 
 
 # ANN Model
 
-```{r}
+```{r ann 1 hidden, eval=FALSE}
 
 
 library(neuralnet)
 library(caret)
 
-#ann_model_1hidden <- neuralnet(yyes ~ . , data = log_train, hidden = 1)
+ann_model_1hidden <- neuralnet(yyes ~ . , data = log_train, hidden = 1)
+saveRDS(ann_model_1hidden , "ann_1hidden.rds")
 
 # do 1 hidden, then 5, then 20 if possible
 
 
 ```
+```{r ann 5 hidden, eval=FALSE}
 
+library(neuralnet)
+library(caret)
+
+ann_model_5hidden <- neuralnet(yyes ~ . , data = log_train, hidden = 5)
+saveRDS(ann_model_5hidden , "ann_5hidden.rds")
+
+
+```
+
+```{r ann 20 hidden}
+
+#library(neuralnet)
+#library(caret)
+
+#ann_model_20hidden <- neuralnet(yyes ~ . , data = log_train, hidden = 20)
+#saveRDS(ann_model_20hidden , "ann_20hidden.rds")
+
+
+
+```
 
 
 

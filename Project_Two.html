@@ -538,6 +538,7 @@ Michael Zuckerman, Anna Dolce, Rubens Mondi</h4>
 
 <div id="TOC">
 <ul>
+<li><a href="#delegating-remaining-work" id="toc-delegating-remaining-work">Delegating remaining work:</a></li>
 <li><a href="#executive-summary" id="toc-executive-summary">Executive
 Summary</a></li>
 <li><a href="#intro" id="toc-intro">Intro</a>
@@ -559,6 +560,23 @@ Regression</a></li>
 </ul>
 </div>
 
+<div id="delegating-remaining-work" class="section level1">
+<h1>Delegating remaining work:</h1>
+<ul>
+<li>find log reg threshold: <strong>Rubens</strong></li>
+<li>best k value for knn(add code for optimization):
+<strong>claire</strong></li>
+<li>hidden value for ann: <strong>kate</strong></li>
+<li>run models and save to rds: <strong>Kate</strong></li>
+<li>intro: <strong>anna and liv</strong></li>
+<li>exec summary: <strong>anna and liv</strong></li>
+<li>conclusion: <strong>mike</strong></li>
+<li>results &amp; financial analysis: <strong>mike</strong></li>
+<li>combine models: <strong>kate</strong></li>
+<li>write explanations under headers explaining the code we did:
+<strong>claire</strong></li>
+</ul>
+</div>
 <div id="executive-summary" class="section level1">
 <h1>Executive Summary</h1>
 <p>[insert exec summary]</p>
@@ -567,9 +585,10 @@ Regression</a></li>
 <h1>Intro</h1>
 <p>[insert intro]</p>
 <ul>
-<li>current success rate = 11.26%</li>
-<li>current profit = -13,348</li>
-<li>break even success rate = 16.667%</li>
+<li><p>introduce problem and process to solve</p></li>
+<li><p>current success rate = 11.26%</p></li>
+<li><p>current profit = -13,348</p></li>
+<li><p>break even success rate = 16.667%</p></li>
 </ul>
 <div id="downloading-and-prepping-the-data" class="section level2">
 <h2>Downloading and Prepping the Data</h2>
@@ -642,7 +661,7 @@ Regression</a></li>
 <span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a><span class="co">#tele$age &lt;- NULL</span></span>
 <span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(tele<span class="sc">$</span>y)</span></code></pre></div>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(tele<span class="sc">$</span>y) <span class="co"># useful for calls and success rates and profits</span></span></code></pre></div>
 <pre><code>##    no   yes 
 ## 36548  4640</code></pre>
 </div>
@@ -870,7 +889,7 @@ Regression</a></li>
 <h1>KNN Model</h1>
 <div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(class)</span>
 <span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>knn_model <span class="ot">&lt;-</span> <span class="fu">knn</span>(tele_train , tele_test , <span class="at">cl =</span> tele_train_labels, <span class="at">k =</span> <span class="dv">1</span>)</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>knn_model <span class="ot">&lt;-</span> <span class="fu">knn</span>(tele_train , tele_test , <span class="at">cl =</span> tele_train_labels, <span class="at">k =</span> <span class="dv">1</span>) <span class="co">#still need to figure out best k</span></span>
 <span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a><span class="co">#saveRDS(knn_model, &quot;testfile.rds&quot;)</span></span>
 <span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a><span class="co"># above is the example he gave to save the model to a file such that it doesnt run many times</span></span>
@@ -925,12 +944,18 @@ Regression</a></li>
 </div>
 <div id="ann-model" class="section level1">
 <h1>ANN Model</h1>
-<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="co">#library(neuralnet)</span></span>
-<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a><span class="co">#library(caret)</span></span>
+<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(neuralnet)</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(caret)</span>
 <span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a><span class="co">#ann_model &lt;- neuralnet(yyes ~ . , data = log_train, hidden = _______)</span></span>
-<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a><span class="co"># do 1 hidden, then 5, then 20 if possible</span></span></code></pre></div>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>ann_model_1hidden <span class="ot">&lt;-</span> <span class="fu">neuralnet</span>(yyes <span class="sc">~</span> . , <span class="at">data =</span> log_train, <span class="at">hidden =</span> <span class="dv">1</span>)</span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(ann_model_1hidden , <span class="st">&quot;ann_1hidden.rds&quot;</span>)</span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a><span class="co"># do 1 hidden, then 5, then 20 if possible</span></span></code></pre></div>
+<div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(neuralnet)</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(caret)</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>ann_model_5hidden <span class="ot">&lt;-</span> <span class="fu">neuralnet</span>(yyes <span class="sc">~</span> . , <span class="at">data =</span> log_train, <span class="at">hidden =</span> <span class="dv">5</span>)</span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(ann_model_1hidden , <span class="st">&quot;ann_5hidden.rds&quot;</span>)</span></code></pre></div>
 </div>
 <div id="combining-models-together" class="section level1">
 <h1>Combining Models Together</h1>
@@ -939,6 +964,10 @@ Regression</a></li>
 <h1>Results and Analysis</h1>
 <p>we should look at the profit from each model individual and combined
 and compare to best</p>
+<ul>
+<li>make sure to talk about favoring false pos over false neg because
+get 6 in revenue compared to 1 cost</li>
+</ul>
 </div>
 <div id="conclusion" class="section level1">
 <h1>Conclusion</h1>
