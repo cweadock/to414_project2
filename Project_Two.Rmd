@@ -138,11 +138,51 @@ summary(log_model_ME)
 
 log_pred_ME <- predict(log_model_ME , log_test , type = "response")
 
-log_pred_ME_binary <- ifelse(log_pred_ME >= 0.15, 1, 0) # have to find the right threshold here; may be useful to find break even rates
+log_pred_ME_binary <- ifelse(log_pred_ME >= 0.3, 1, 0) # have to find the right threshold here; may be useful to find break even rates
 
 
 library(caret)
-confusionMatrix(as.factor(log_pred_ME_binary) , as.factor(log_test$yyes), positive = "1")
+confmat <- confusionMatrix(as.factor(log_pred_ME_binary) , as.factor(log_test$yyes), positive = "1")
+
+confmat
+outcome_weights <- matrix(
+          c(0, 0,
+          -1, 5),
+          nrow = 2,
+          byrow = TRUE
+)
+
+conf_mat_wg <- sum(confmat$table*outcome_weights)
+str(conf_mat_wg)
+
+outcome <- data.frame(threshold = numeric(), profit = numeric())
+
+
+#We have created  a for loop that calculate the profit level for each threshold in the range from 0 to 1 with steps of 0.01. 
+
+threshold_list <- seq(from = 0.01, to = 1, by = 0.01)
+for (i in threshold_list) {
+  log_pred_ME_binary <- ifelse(log_pred_ME >= i, 1, 0)
+  confmat <- confusionMatrix(as.factor(log_pred_ME_binary) , as.factor(log_test$yyes), positive = "1")
+  out <- sum(confmat$table*outcome_weights)
+  nrow <- data.frame(threshold = i, profit = out)
+  outcome <- rbind(outcome,nrow)
+}
+#the loop resulted in the outcome data-frame, which contain the bottom line profit for each threshold level. 
+# We have build a line plot to visualize the result form the loop, from which is apparent that the optimal threshold resides between 0.15 and 0.25. As a matter of fact, a threshold of 0.19 return a profit of 2493 $, which is the highest possible. 
+#NB. It is possible to take into account the opportunity cost of losing the call for which we predicted a negative outcome but which actually could have been resulted in a loan subscription. In that case we should adjust the outcome_weights matrix for a value x in c(0, x , -1, 5) that accounts for the opportunity cost (-5<x<0). 
+outcome
+ggplot(outcome, aes(x = threshold, y = profit)) + 
+  geom_line() + 
+  labs(x = "Threshold", y = "Profit", title = "Profit per Treshold level")
+
+#With the optimal threshold value we have: 
+log_pred_ME_binary <- ifelse(log_pred_ME >= 0.19, 1, 0)
+opt_confmat <- confusionMatrix(as.factor(log_pred_ME_binary) , as.factor(log_test$yyes), positive = "1") 
+opt_confmat #this is the confusion matrix before applying weights 
+
+opt_conf_mat_wg <- confmat$table*outcome_weights 
+opt_conf_mat_wg #this is the confusion matrix after applying the weights 
 ```
 
 

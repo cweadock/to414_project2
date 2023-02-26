@@ -598,8 +598,8 @@ Regression</a></li>
 <pre><code>##        X              age                 job            marital     
 ##  Min.   :    1   Min.   :17.00   admin.     :10422   divorced: 4612  
 ##  1st Qu.:10298   1st Qu.:32.00   blue-collar: 9254   married :24928  
-##  Median :20594   Median :38.00   technician : 6743   single  :11568  
-##  Mean   :20594   Mean   :40.02   services   : 3969   unknown :   80  
+##  Median :20595   Median :38.00   technician : 6743   single  :11568  
+##  Mean   :20595   Mean   :40.02   services   : 3969   unknown :   80  
 ##  3rd Qu.:30891   3rd Qu.:47.00   management : 2924                   
 ##  Max.   :41188   Max.   :98.00   retired    : 1720                   
 ##                                  (Other)    : 6156                   
@@ -850,53 +850,270 @@ Regression</a></li>
 <div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>log_pred_ME <span class="ot">&lt;-</span> <span class="fu">predict</span>(log_model_ME , log_test , <span class="at">type =</span> <span class="st">&quot;response&quot;</span>)</span></code></pre></div>
 <pre><code>## Warning in predict.lm(object, newdata, se.fit, scale = 1, type = if (type == :
 ## prediction from a rank-deficient fit may be misleading</code></pre>
-<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>log_pred_ME_binary <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(log_pred_ME <span class="sc">&gt;=</span> <span class="fl">0.15</span>, <span class="dv">1</span>, <span class="dv">0</span>) <span class="co"># have to find the right threshold here; may be useful to find break even rates</span></span>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>log_pred_ME_binary <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(log_pred_ME <span class="sc">&gt;=</span> <span class="fl">0.3</span>, <span class="dv">1</span>, <span class="dv">0</span>) <span class="co"># have to find the right threshold here; may be useful to find break even rates</span></span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(caret)</span></code></pre></div>
 <pre><code>## Loading required package: ggplot2</code></pre>
 <pre><code>## Loading required package: lattice</code></pre>
-<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">confusionMatrix</span>(<span class="fu">as.factor</span>(log_pred_ME_binary) , <span class="fu">as.factor</span>(log_test<span class="sc">$</span>yyes), <span class="at">positive =</span> <span class="st">&quot;1&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>confmat <span class="ot">&lt;-</span> <span class="fu">confusionMatrix</span>(<span class="fu">as.factor</span>(log_pred_ME_binary) , <span class="fu">as.factor</span>(log_test<span class="sc">$</span>yyes), <span class="at">positive =</span> <span class="st">&quot;1&quot;</span>)</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>confmat</span></code></pre></div>
 <pre><code>## Confusion Matrix and Statistics
 ## 
 ##           Reference
 ## Prediction    0    1
-##          0 7807  449
-##          1 1044  700
+##          0 8396  650
+##          1  455  499
 ##                                           
-##                Accuracy : 0.8507          
-##                  95% CI : (0.8436, 0.8576)
+##                Accuracy : 0.8895          
+##                  95% CI : (0.8832, 0.8956)
 ##     No Information Rate : 0.8851          
-##     P-Value [Acc &gt; NIR] : 1               
+##     P-Value [Acc &gt; NIR] : 0.08572         
 ##                                           
-##                   Kappa : 0.4009          
+##                   Kappa : 0.4134          
 ##                                           
-##  Mcnemar&#39;s Test P-Value : &lt;2e-16          
+##  Mcnemar&#39;s Test P-Value : 5.345e-09       
 ##                                           
-##             Sensitivity : 0.6092          
-##             Specificity : 0.8820          
-##          Pos Pred Value : 0.4014          
-##          Neg Pred Value : 0.9456          
+##             Sensitivity : 0.4343          
+##             Specificity : 0.9486          
+##          Pos Pred Value : 0.5231          
+##          Neg Pred Value : 0.9281          
 ##              Prevalence : 0.1149          
-##          Detection Rate : 0.0700          
-##    Detection Prevalence : 0.1744          
-##       Balanced Accuracy : 0.7456          
+##          Detection Rate : 0.0499          
+##    Detection Prevalence : 0.0954          
+##       Balanced Accuracy : 0.6914          
 ##                                           
 ##        &#39;Positive&#39; Class : 1               
 ## </code></pre>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>outcome_weights <span class="ot">&lt;-</span> <span class="fu">matrix</span>(</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>          <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">0</span>,</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>          <span class="sc">-</span><span class="dv">1</span>, <span class="dv">5</span>),</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>          <span class="at">nrow =</span> <span class="dv">2</span>,</span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>          <span class="at">byrow =</span> <span class="cn">TRUE</span></span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>conf_mat_wg <span class="ot">&lt;-</span> <span class="fu">sum</span>(confmat<span class="sc">$</span>table<span class="sc">*</span>outcome_weights)</span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(conf_mat_wg)</span></code></pre></div>
+<pre><code>##  num 2040</code></pre>
+<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>outcome <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">threshold =</span> <span class="fu">numeric</span>(), <span class="at">profit =</span> <span class="fu">numeric</span>())</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a><span class="co">#We have created  a for loop that calculate the profit level for each threshold in the range from 0 to 1 with steps of 0.01. </span></span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>threshold_list <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="at">from =</span> <span class="fl">0.01</span>, <span class="at">to =</span> <span class="dv">1</span>, <span class="at">by =</span> <span class="fl">0.01</span>)</span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> threshold_list) {</span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>  log_pred_ME_binary <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(log_pred_ME <span class="sc">&gt;=</span> i, <span class="dv">1</span>, <span class="dv">0</span>)</span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a>  confmat <span class="ot">&lt;-</span> <span class="fu">confusionMatrix</span>(<span class="fu">as.factor</span>(log_pred_ME_binary) , <span class="fu">as.factor</span>(log_test<span class="sc">$</span>yyes), <span class="at">positive =</span> <span class="st">&quot;1&quot;</span>)</span>
+<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a>  out <span class="ot">&lt;-</span> <span class="fu">sum</span>(confmat<span class="sc">$</span>table<span class="sc">*</span>outcome_weights)</span>
+<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a>  nrow <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">threshold =</span> i, <span class="at">profit =</span> out)</span>
+<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a>  outcome <span class="ot">&lt;-</span> <span class="fu">rbind</span>(outcome,nrow)</span>
+<span id="cb20-13"><a href="#cb20-13" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<pre><code>## Warning in confusionMatrix.default(as.factor(log_pred_ME_binary),
+## as.factor(log_test$yyes), : Levels are not in the same order for reference and
+## data. Refactoring data to match.</code></pre>
+<pre><code>## Warning in confusionMatrix.default(as.factor(log_pred_ME_binary),
+## as.factor(log_test$yyes), : Levels are not in the same order for reference and
+## data. Refactoring data to match.
+
+## Warning in confusionMatrix.default(as.factor(log_pred_ME_binary),
+## as.factor(log_test$yyes), : Levels are not in the same order for reference and
+## data. Refactoring data to match.
+
+## Warning in confusionMatrix.default(as.factor(log_pred_ME_binary),
+## as.factor(log_test$yyes), : Levels are not in the same order for reference and
+## data. Refactoring data to match.
+
+## Warning in confusionMatrix.default(as.factor(log_pred_ME_binary),
+## as.factor(log_test$yyes), : Levels are not in the same order for reference and
+## data. Refactoring data to match.
+
+## Warning in confusionMatrix.default(as.factor(log_pred_ME_binary),
+## as.factor(log_test$yyes), : Levels are not in the same order for reference and
+## data. Refactoring data to match.
+
+## Warning in confusionMatrix.default(as.factor(log_pred_ME_binary),
+## as.factor(log_test$yyes), : Levels are not in the same order for reference and
+## data. Refactoring data to match.
+
+## Warning in confusionMatrix.default(as.factor(log_pred_ME_binary),
+## as.factor(log_test$yyes), : Levels are not in the same order for reference and
+## data. Refactoring data to match.
+
+## Warning in confusionMatrix.default(as.factor(log_pred_ME_binary),
+## as.factor(log_test$yyes), : Levels are not in the same order for reference and
+## data. Refactoring data to match.
+
+## Warning in confusionMatrix.default(as.factor(log_pred_ME_binary),
+## as.factor(log_test$yyes), : Levels are not in the same order for reference and
+## data. Refactoring data to match.
+
+## Warning in confusionMatrix.default(as.factor(log_pred_ME_binary),
+## as.factor(log_test$yyes), : Levels are not in the same order for reference and
+## data. Refactoring data to match.
+
+## Warning in confusionMatrix.default(as.factor(log_pred_ME_binary),
+## as.factor(log_test$yyes), : Levels are not in the same order for reference and
+## data. Refactoring data to match.</code></pre>
+<div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="co">#the loop resulted in the outcome data-frame, which contain the bottom line profit for each threshold level. </span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a><span class="co"># We have build a line plot to visualize the result form the loop, from which is apparent that the optimal threshold resides between 0.15 and 0.25. As a matter of fact, a threshold of 0.19 return a profit of 2493 $, which is the highest possible. </span></span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a><span class="co">#NB. It is possible to take into account the opportunity cost of losing the call for which we predicted a negative outcome but which actually could have been resulted in a loan subscription. In that case we should adjust the outcome_weights matrix for a value x in c(0, x , -1, 5) that accounts for the opportunity cost (-5&lt;x&lt;0). </span></span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>outcome</span></code></pre></div>
+<pre><code>##     threshold profit
+## 1        0.01  -3103
+## 2        0.02  -3039
+## 3        0.03  -2461
+## 4        0.04  -1132
+## 5        0.05    102
+## 6        0.06    931
+## 7        0.07   1511
+## 8        0.08   1950
+## 9        0.09   2153
+## 10       0.10   2235
+## 11       0.11   2311
+## 12       0.12   2356
+## 13       0.13   2417
+## 14       0.14   2439
+## 15       0.15   2456
+## 16       0.16   2494
+## 17       0.17   2490
+## 18       0.18   2484
+## 19       0.19   2493
+## 20       0.20   2496
+## 21       0.21   2477
+## 22       0.22   2463
+## 23       0.23   2430
+## 24       0.24   2374
+## 25       0.25   2304
+## 26       0.26   2253
+## 27       0.27   2218
+## 28       0.28   2165
+## 29       0.29   2082
+## 30       0.30   2040
+## 31       0.31   1983
+## 32       0.32   1955
+## 33       0.33   1912
+## 34       0.34   1872
+## 35       0.35   1863
+## 36       0.36   1855
+## 37       0.37   1795
+## 38       0.38   1708
+## 39       0.39   1651
+## 40       0.40   1590
+## 41       0.41   1518
+## 42       0.42   1455
+## 43       0.43   1429
+## 44       0.44   1400
+## 45       0.45   1360
+## 46       0.46   1296
+## 47       0.47   1240
+## 48       0.48   1188
+## 49       0.49   1153
+## 50       0.50   1137
+## 51       0.51   1134
+## 52       0.52   1085
+## 53       0.53   1058
+## 54       0.54   1034
+## 55       0.55    993
+## 56       0.56    984
+## 57       0.57    968
+## 58       0.58    957
+## 59       0.59    944
+## 60       0.60    935
+## 61       0.61    902
+## 62       0.62    873
+## 63       0.63    832
+## 64       0.64    776
+## 65       0.65    769
+## 66       0.66    731
+## 67       0.67    689
+## 68       0.68    666
+## 69       0.69    641
+## 70       0.70    591
+## 71       0.71    557
+## 72       0.72    514
+## 73       0.73    477
+## 74       0.74    415
+## 75       0.75    374
+## 76       0.76    332
+## 77       0.77    301
+## 78       0.78    259
+## 79       0.79    236
+## 80       0.80    213
+## 81       0.81    191
+## 82       0.82    162
+## 83       0.83    134
+## 84       0.84    129
+## 85       0.85     85
+## 86       0.86     42
+## 87       0.87     19
+## 88       0.88     10
+## 89       0.89      0
+## 90       0.90      0
+## 91       0.91      0
+## 92       0.92      0
+## 93       0.93      0
+## 94       0.94      0
+## 95       0.95      0
+## 96       0.96      0
+## 97       0.97      0
+## 98       0.98      0
+## 99       0.99      0
+## 100      1.00      0</code></pre>
+<div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(outcome, <span class="fu">aes</span>(<span class="at">x =</span> threshold, <span class="at">y =</span> profit)) <span class="sc">+</span> </span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>() <span class="sc">+</span> </span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">&quot;Threshold&quot;</span>, <span class="at">y =</span> <span class="st">&quot;Profit&quot;</span>, <span class="at">title =</span> <span class="st">&quot;Profit per Treshold level&quot;</span>)</span></code></pre></div>
+<p><img src="data:image/png;base64,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" width="672" /></p>
+<div class="sourceCode" id="cb26"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="co">#With the optimal threshold value we have: </span></span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>log_pred_ME_binary <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(log_pred_ME <span class="sc">&gt;=</span> <span class="fl">0.19</span>, <span class="dv">1</span>, <span class="dv">0</span>)</span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>opt_confmat <span class="ot">&lt;-</span> <span class="fu">confusionMatrix</span>(<span class="fu">as.factor</span>(log_pred_ME_binary) , <span class="fu">as.factor</span>(log_test<span class="sc">$</span>yyes), <span class="at">positive =</span> <span class="st">&quot;1&quot;</span>) </span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>opt_confmat <span class="co">#this is the confusion matrix before applying weights </span></span></code></pre></div>
+<pre><code>## Confusion Matrix and Statistics
+## 
+##           Reference
+## Prediction    0    1
+##          0 8009  482
+##          1  842  667
+##                                           
+##                Accuracy : 0.8676          
+##                  95% CI : (0.8608, 0.8742)
+##     No Information Rate : 0.8851          
+##     P-Value [Acc &gt; NIR] : 1               
+##                                           
+##                   Kappa : 0.4271          
+##                                           
+##  Mcnemar&#39;s Test P-Value : &lt;2e-16          
+##                                           
+##             Sensitivity : 0.5805          
+##             Specificity : 0.9049          
+##          Pos Pred Value : 0.4420          
+##          Neg Pred Value : 0.9432          
+##              Prevalence : 0.1149          
+##          Detection Rate : 0.0667          
+##    Detection Prevalence : 0.1509          
+##       Balanced Accuracy : 0.7427          
+##                                           
+##        &#39;Positive&#39; Class : 1               
+## </code></pre>
+<div class="sourceCode" id="cb28"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>opt_conf_mat_wg <span class="ot">&lt;-</span> confmat<span class="sc">$</span>table<span class="sc">*</span>outcome_weights </span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>opt_conf_mat_wg <span class="co">#this is the confusion matrix after applying the weights </span></span></code></pre></div>
+<pre><code>##           Reference
+## Prediction 0 1
+##          0 0 0
+##          1 0 0</code></pre>
 </div>
 <div id="knn-model" class="section level1">
 <h1>KNN Model</h1>
-<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(class)</span>
-<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>knn_model <span class="ot">&lt;-</span> <span class="fu">knn</span>(tele_train , tele_test , <span class="at">cl =</span> tele_train_labels, <span class="at">k =</span> <span class="dv">1</span>) <span class="co">#still need to figure out best k</span></span>
-<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a><span class="co">#saveRDS(knn_model, &quot;testfile.rds&quot;)</span></span>
-<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a><span class="co"># above is the example he gave to save the model to a file such that it doesnt run many times</span></span>
-<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(gmodels)</span>
-<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a><span class="fu">CrossTable</span>(knn_model , tele_test_labels)</span></code></pre></div>
+<div class="sourceCode" id="cb30"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(class)</span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>knn_model <span class="ot">&lt;-</span> <span class="fu">knn</span>(tele_train , tele_test , <span class="at">cl =</span> tele_train_labels, <span class="at">k =</span> <span class="dv">1</span>) <span class="co">#still need to figure out best k</span></span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a><span class="co">#saveRDS(knn_model, &quot;testfile.rds&quot;)</span></span>
+<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a><span class="co"># above is the example he gave to save the model to a file such that it doesnt run many times</span></span>
+<span id="cb30-7"><a href="#cb30-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-8"><a href="#cb30-8" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(gmodels)</span>
+<span id="cb30-9"><a href="#cb30-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-10"><a href="#cb30-10" aria-hidden="true" tabindex="-1"></a><span class="fu">CrossTable</span>(knn_model , tele_test_labels)</span></code></pre></div>
 <pre><code>## 
 ##  
 ##    Cell Contents
@@ -919,7 +1136,7 @@ Regression</a></li>
 ##              |     7.009 |    53.988 |           | 
 ##              |     0.912 |     0.088 |     0.887 | 
 ##              |     0.914 |     0.683 |           | 
-##              |     0.809 |     0.079 |           | 
+##              |     0.809 |     0.078 |           | 
 ## -------------|-----------|-----------|-----------|
 ##            1 |       762 |       364 |      1126 | 
 ##              |    55.234 |   425.482 |           | 
@@ -932,30 +1149,26 @@ Regression</a></li>
 ## -------------|-----------|-----------|-----------|
 ## 
 ## </code></pre>
-<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="co">#This is the code for how to retrieve model from RDS file for prediction</span></span>
-<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a><span class="co">#knn_test &lt;- readRDS(&quot;testfile.rds&quot;)</span></span>
-<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a><span class="co">#library(gmodels)</span></span>
-<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a><span class="co">#CrossTable(knn_test , tele_test_labels)</span></span></code></pre></div>
 </div>
 <div id="ann-model" class="section level1">
 <h1>ANN Model</h1>
-<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(neuralnet)</span>
-<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(caret)</span>
-<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>ann_model_1hidden <span class="ot">&lt;-</span> <span class="fu">neuralnet</span>(yyes <span class="sc">~</span> . , <span class="at">data =</span> log_train, <span class="at">hidden =</span> <span class="dv">1</span>)</span>
-<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(ann_model_1hidden , <span class="st">&quot;ann_1hidden.rds&quot;</span>)</span>
-<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a><span class="co"># do 1 hidden, then 5, then 20 if possible</span></span></code></pre></div>
-<div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(neuralnet)</span>
-<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(caret)</span>
-<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>ann_model_5hidden <span class="ot">&lt;-</span> <span class="fu">neuralnet</span>(yyes <span class="sc">~</span> . , <span class="at">data =</span> log_train, <span class="at">hidden =</span> <span class="dv">5</span>)</span>
-<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(ann_model_1hidden , <span class="st">&quot;ann_5hidden.rds&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb32"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(neuralnet)</span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(caret)</span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a>ann_model_1hidden <span class="ot">&lt;-</span> <span class="fu">neuralnet</span>(yyes <span class="sc">~</span> . , <span class="at">data =</span> log_train, <span class="at">hidden =</span> <span class="dv">1</span>)</span>
+<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(ann_model_1hidden , <span class="st">&quot;ann_1hidden.rds&quot;</span>)</span>
+<span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-7"><a href="#cb32-7" aria-hidden="true" tabindex="-1"></a><span class="co"># do 1 hidden, then 5, then 20 if possible</span></span></code></pre></div>
+<div class="sourceCode" id="cb33"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(neuralnet)</span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(caret)</span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a>ann_model_5hidden <span class="ot">&lt;-</span> <span class="fu">neuralnet</span>(yyes <span class="sc">~</span> . , <span class="at">data =</span> log_train, <span class="at">hidden =</span> <span class="dv">5</span>)</span>
+<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(ann_model_5hidden , <span class="st">&quot;ann_5hidden.rds&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb34"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="co">#library(neuralnet)</span></span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a><span class="co">#library(caret)</span></span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a><span class="co">#ann_model_20hidden &lt;- neuralnet(yyes ~ . , data = log_train, hidden = 20)</span></span>
+<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a><span class="co">#saveRDS(ann_model_20hidden , &quot;ann_20hidden.rds&quot;)</span></span></code></pre></div>
 </div>
 <div id="combining-models-together" class="section level1">
 <h1>Combining Models Together</h1>
