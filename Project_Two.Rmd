@@ -211,6 +211,9 @@ CrossTable(knn_model , tele_test_labels)
 
 # ANN Model
 
+Per our discussion with Professor Kumar's, we attempted to run an ANN model on the data using 1, 5, and 20 as potential hidden values. In the first two code blocks below, you can see our code which runs an ANN model using both 1 and 5 for hidden values and saving them to RDS files respectively. However, due to the limited computing power of our personal laptops, we were unable to get an ANN model with hidden = 20 to run successfully. The code which we unsuccessfully attempted is also illustrated below in the third code block.
+
+
 ```{r ann 1 hidden, eval=FALSE}
 
 
@@ -224,6 +227,9 @@ saveRDS(ann_model_1hidden , "ann_1hidden.rds")
 
 
 ```
+
+
+
 ```{r ann 5 hidden, eval=FALSE}
 
 library(neuralnet)
@@ -235,13 +241,13 @@ saveRDS(ann_model_5hidden , "ann_5hidden.rds")
 
 ```
 
-```{r ann 20 hidden}
+```{r ann 20 hidden, eval=FALSE}
 
-#library(neuralnet)
-#library(caret)
+library(neuralnet)
+library(caret)
 
-#ann_model_20hidden <- neuralnet(yyes ~ . , data = log_train, hidden = 20)
-#saveRDS(ann_model_20hidden , "ann_20hidden.rds")
+ann_model_20hidden <- neuralnet(yyes ~ . , data = log_train, hidden = 20)
+saveRDS(ann_model_20hidden , "ann_20hidden.rds")
 
 
 
@@ -250,6 +256,19 @@ saveRDS(ann_model_5hidden , "ann_5hidden.rds")
 
 
 # Combining Models Together
+
+```{r}
+
+# summation function 
+# if else statement of 2 or more to make binary prediction
+
+# test combo model against actual test data outcomes
+
+
+
+```
+
+
 
 
 # Results and Analysis
