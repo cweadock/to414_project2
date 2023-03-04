@@ -8,6 +8,8 @@ output:
     theme: readable
     highlight: tango
     code_folding: show
+    number_sections: true
+    toc_float: true
 ---
 
 ```{r setup, include=FALSE}
@@ -106,6 +108,7 @@ test_set <- sample(1:nrow(tele_norm), 10000)
 # Depending on R-version and computer, different rows may be selected. 
 # If that happens, results are different. 
 
+# we only want the labels taken out of the data set for the knn model, the other two we can use a test/train break up with all variables included.
 log_train <- tele_norm[ -test_set, ]
 log_test <- tele_norm[ test_set , ]
 
@@ -213,6 +216,11 @@ CrossTable(knn_model , tele_test_labels)
 
 Per our discussion with Professor Kumar's, we attempted to run an ANN model on the data using 1, 5, and 20 as potential hidden values. In the first two code blocks below, you can see our code which runs an ANN model using both 1 and 5 for hidden values and saving them to RDS files respectively. However, due to the limited computing power of our personal laptops, we were unable to get an ANN model with hidden = 20 to run successfully. The code which we unsuccessfully attempted is also illustrated below in the third code block.
 
+We chose to save each model into an RDS file then mark that code block as eval=FALSE because it prevents the computer from having to re-run the ANN model each time the file is knitted while still being able to keep the entire project on one cohesive rmd and html. 
+
+## ANN with 1 Hidden
+
+Below is the code which generates an ANN model with hidden = 1.
 
 ```{r ann 1 hidden, eval=FALSE}
 
@@ -228,7 +236,9 @@ saveRDS(ann_model_1hidden , "ann_1hidden.rds")
 
 ```
 
+## ANN with 5 Hidden
 
+Below is the code which generates an ANN model with hidden = 5.
 
 ```{r ann 5 hidden, eval=FALSE}
 
@@ -240,6 +250,10 @@ saveRDS(ann_model_5hidden , "ann_5hidden.rds")
 
 
 ```
+
+## ANN with 20 Hidden
+
+Below is the code which would have generated an ANN model with hidden = 20, had our computers had enough computing resources to build the train the model.
 
 ```{r ann 20 hidden, eval=FALSE}
 
@@ -254,6 +268,76 @@ saveRDS(ann_model_20hidden , "ann_20hidden.rds")
 ```
 
 
+## ANN Prediction
+
+Now that we have an ANN model with a hidden = 5, we can use that model to predict outcomes using out test data. This follows the same process as usual by first loading the RDS file into the code bloc, then using the predict function, and finally generating a confusion matrix to visualize the accuracy of our prediction against the real outcomes in the test data. 
+
+```{r 5 hidden prediction}
+
+hidden5_RDS <- readRDS("ann_5hidden.rds")
+pred_5hidden <- predict(hidden5_RDS , log_test)
+# we need to optimize the profits based on what we have for the threshold under binarypred_5hidden
+binarypred_5hidden <- ifelse(pred_5hidden >= 0.5 , 1, 0)
+
+library(caret)
+confusionMatrix(as.factor(binarypred_5hidden) , as.factor(log_test$yyes) , positive = "1")
+
+```
+
+In order for the call center to maximize profits using this model, we need to determine the optimal threshold for creating the binary 0 and 1 prediction of if they should call or not. Like in the logistic regression, it is important that we do not only care about overall accuracy, but also the sensitivity vs the specificity. In this case we want to boost the sensitivity as much as we can without sacrificing too much specificity. This is because from a business standpoint, each successful call gains 6 dollars in revenue whereas each unsuccessful call only costs 1 dollar. Therefore, we care much more about catching as many 1s as we can in this model at the expense of picking up some false positives in our prediction. See the following section for code which optimizes the threshold.
+
+
+### Optimizing Binary Prediction Threshold to Maximize Profits
+
+As stated above, we need to code a for loop to find the threshold which will maximize profits for the call center. This process followed directly mirrors that in the logistic regression model. 
+
+```{r}
+
+
+library(caret)
+confmat_ann <- confusionMatrix(as.factor(binarypred_5hidden) , as.factor(log_test$yyes), positive = "1")
+
+confmat_ann
+outcome_weights_ann <- matrix(
+          c(0, 0,
+          -1, 5),
+          nrow = 2,
+          byrow = TRUE
+)
+
+
+conf_mat_wg_ann <- sum(confmat_ann$table*outcome_weights_ann)
+str(conf_mat_wg_ann)
+
+outcome_ann <- data.frame(threshold = numeric(), profit = numeric())
+
+threshold_list_ann <- seq(from = 0.01, to = 1, by = 0.01)
+
+for (i in threshold_list_ann) {
+  binarypred_5hidden <- ifelse(pred_5hidden >= i, 1, 0)
+  confmat_ann <- confusionMatrix(as.factor(binarypred_5hidden) , as.factor(log_test$yyes), positive = "1")
+  out <- sum(confmat_ann$table*outcome_weights_ann)
+  nrow <- data.frame(threshold = i, profit = out)
+  outcome_ann <- rbind(outcome_ann,nrow)
+}
+
+outcome_ann
+ggplot(outcome_ann, aes(x = threshold, y = profit)) + 
+  geom_line() + 
+  labs(x = "Threshold", y = "Profit", title = "Profit per Treshold level")
+
+# the optimal threshold looking at the table and plot is 0.11, so let's generate a prediction and confusionMatrix using said value
+
+binarypred_5hidden <- ifelse(pred_5hidden >= 0.11 , 1, 0)
+
+library(caret)
+confusionMatrix(as.factor(binarypred_5hidden) , as.factor(log_test$yyes) , positive = "1")
+
+
+```
+
+Therefore, the optimal threshold for the ANN model prediction is 0.11. 
+
 
 # Combining Models Together
 
@@ -266,6 +350,9 @@ saveRDS(ann_model_20hidden , "ann_20hidden.rds")
 
 
 
+
+
+
 ```
 
 
@@ -273,7 +360,7 @@ saveRDS(ann_model_20hidden , "ann_20hidden.rds")
 
 # Results and Analysis
 
-we should look at the profit from each model individual and combined and compare to best
+we should look at the profit from each model individual and combined and compare to best -- remember that in the financial analysis we don't care so much about the opporunity cost, just the bottom line profit Rev - Cost of each call that would be hypothetically reported on a financial statement
 
 
 - make sure to talk about favoring false pos over false neg because get 6 in revenue compared to 1 cost
