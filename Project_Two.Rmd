@@ -204,11 +204,52 @@ knn_model <- knn(tele_train , tele_test , cl = tele_train_labels, k = 1) #still 
 
 library(gmodels)
 
-CrossTable(knn_model , tele_test_labels)
+#d <- CrossTable(knn_model , tele_test_labels)
 
 ```
 
 
+# Finding optimal k value based on model accuracy
+
+```{r}
+accuracies<- c()
+for (i in 1:10){ 
+    knn.mod <-  knn(train=tele_train, test=tele_test, cl=tele_train_labels, k=i)
+    k.optm[i] <- 100 * sum(tele_test_labels == knn.mod)/NROW(tele_test_labels)
+    k=i  
+    accuracies <- append(accuracies, k.optm[i])
+    cat(k,'=',k.optm[i],'\n')       # to print % accuracy 
+}
+```
+```{r}
+plot(accuracies, type = "o", xlab="k value", ylab = "Accuracy %")
+```
+
+
+# Finding financially optimal k value
+
+```{r}
+profits <- c()
+
+for (i in 1:10){
+  knn.mod2 <-  knn(train=tele_train, test=tele_test, cl=tele_train_labels, k=i)
+  crosstab <- CrossTable(knn.mod2 , tele_test_labels, prop.r = FALSE, prop.c = FALSE, prop.t = FALSE, prop.chisq = FALSE)
+  A <- crosstab$t['0','0']
+  B <- crosstab$t['1','0']
+  C <- crosstab$t['0','1']
+  D <- crosstab$t['1','1']
+  
+  profit <- (A)-(5*B)-(C)+(5*D)
+  profits <- append(profits, profit)
+  
+  cat('k =', i, 'then profit = $', profit, '\n')
+}
+```
+
+```{r}
+plot(profits, type = "o", xlab="k value", ylab = "Profit $")
+
+```
 
 
 
