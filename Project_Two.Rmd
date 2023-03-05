@@ -16,27 +16,14 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-# Delegating remaining work:
-
-- find log reg threshold: **Rubens**
-- best k value for knn(add code for optimization): **claire**
-- hidden value for ann: **kate**
-- run models and save to rds: **Kate**
-- intro: **anna and liv**
-- exec summary: **anna and liv**
-- conclusion: **mike**
-- results & financial analysis: **mike**
-- combine models: **kate**
-- write explanations under headers explaining the code we did: **claire**
-
 
 # Executive Summary
 
-[insert exec summary]
+**[insert exec summary]**
 
 # Intro
 
-[insert intro]
+**[insert intro]**
 
 - introduce problem and process to solve
 
@@ -46,6 +33,8 @@ knitr::opts_chunk$set(echo = TRUE)
 
 
 ## Downloading and Prepping the Data
+
+Professor Kumar had given us a starter rmd file with the relevant data already loaded, cleaned, and normalized. The corresponding code blocks are displayed below.
 
 ```{r}
 #Downloading and Prepping the Data
@@ -62,15 +51,8 @@ tele$X <- NULL
 tele$pdaysdummy <- ifelse(tele$pdays == 999, 0, 1)
 tele$pdays <- NULL
 
+summary(tele$y) #this was used to calculate some of the statistics in the intro
 
-#banding age into generational categories
-#tele$age_range <- ifelse(tele$age <= 25 , "Under 25" ,
-                        #ifelse(tele$age > 25 & tele$age <= 42, "26-42", 
-                               #ifelse(tele$age > 42 & tele$age <= 58, "43-58", "Over 58")))
-
-#tele$age <- NULL
-
-summary(tele$y) # useful for calls and success rates and profits
 
 ```
 
@@ -128,14 +110,13 @@ tele_test_labels <- tele_norm[test_set, "yyes"]
 
 # Logistic Regression
 
+See the following code along with comments which outline the process we followed to create a logistic regression model with the call center data.
+
 ```{r log model main effects}
 
 log_model_ME <- glm(yyes ~ . , data = log_train , family = "binomial")
 
 
-#below is code prof gave if we want to do all interactions and step function but may not be worth it because regression not precise
-#log_model_test <- glm(yyes ~ . + .*., data = log_train , family = "binomial")
-#summary(log_model_test)
 
 summary(log_model_ME)
 
@@ -427,10 +408,8 @@ confusionMatrix(as.factor(binary_combined_call) , as.factor(log_test$yyes) , pos
 
 # Results and Analysis
 
-we should look at the profit from each model individual and combined and compare to best -- remember that in the financial analysis we don't care so much about the opporunity cost, just the bottom line profit Rev - Cost of each call that would be hypothetically reported on a financial statement
-
-
-- make sure to talk about favoring false pos over false neg because get 6 in revenue compared to 1 cost
+**[INSERT RESULTS AND ANALYSIS]**
 
 # Conclusion
 
+**[INSERT CONCLUSION]**
