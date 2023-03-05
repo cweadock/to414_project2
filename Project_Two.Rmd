@@ -193,32 +193,37 @@ opt_conf_mat_wg #this is the confusion matrix after applying the weights
 
 # KNN Model
 
-```{r}
+The first KNN model we tried was simple with k=1 nearest neighbors. This gives us an idea of a starting point to determine the optimal KNN model for the call center to use.
+
+```{r first knn, cache=TRUE}
 
 library(class)
+knn_model_first <- knn(tele_train , tele_test , cl = tele_train_labels, k = 1)
 
-knn_model <- knn(tele_train , tele_test , cl = tele_train_labels, k = 1) #still need to figure out best k
 
-#saveRDS(knn_model, "testfile.rds")
-# above is the example he gave to save the model to a file such that it doesnt run many times
-
-library(gmodels)
-
-#d <- CrossTable(knn_model , tele_test_labels)
 
 ```
 
-
-# Finding optimal k value based on model accuracy
-
 ```{r}
+
+library(caret)
+confusionMatrix(as.factor(knn_model_first) , as.factor(tele_test_labels) , positive = "1")
+
+```
+
+As shown in the confusion Matrix, this KNN model is missing a large amount of successful calls (false negatives) and therefore is missing out on a large amount of potential profit. To determine the optimal K value we can run various for loops which test different k values for both accuracy and profitability (taking opportunity cost into account). 
+
+
+## Finding optimal k value based on model accuracy
+
+```{r knn optimal accuracy, cache=TRUE}
 accuracies<- c()
 for (i in 1:10){ 
     knn.mod <-  knn(train=tele_train, test=tele_test, cl=tele_train_labels, k=i)
-    k.optm[i] <- 100 * sum(tele_test_labels == knn.mod)/NROW(tele_test_labels)
+    optm_k <- 100 * sum(tele_test_labels == knn.mod)/NROW(tele_test_labels)
     k=i  
-    accuracies <- append(accuracies, k.optm[i])
-    cat(k,'=',k.optm[i],'\n')       # to print % accuracy 
+    accuracies <- append(accuracies, optm_k)
+    cat(k,'=',optm_k,'\n')       # to print % accuracy 
 }
 ```
 ```{r}
@@ -226,9 +231,16 @@ plot(accuracies, type = "o", xlab="k value", ylab = "Accuracy %")
 ```
 
 
-# Finding financially optimal k value
+## Finding financially optimal k value
+
 
 ```{r}
+library(gmodels)
+
+```
+
+
+```{r knn optimal profits, cache=TRUE}
 profits <- c()
 
 for (i in 1:10){
@@ -248,6 +260,17 @@ for (i in 1:10){
 
 ```{r}
 plot(profits, type = "o", xlab="k value", ylab = "Profit $")
+
+```
+
+You can see that if you were to look soley based on the accuracy of the model, the optimal k would have been 7. However, the scope of this project is to make the call center the most profitable rather than make the model the most accurate, therefore we can see that the true optimal k once profitability and opportunity cost are taken into account is k=9. Below is the code for a KNN model using the optimal k value of 9.
+
+```{r optimal knn model}
+library(class)
+optimal_knn_pred <- knn(tele_train , tele_test , cl = tele_train_labels, k = 9)
+
+library(class)
+confusionMatrix(as.factor(optimal_knn_pred) , as.factor(tele_test_labels) , positive = "1")
 
 ```
 
@@ -382,17 +405,20 @@ Therefore, the optimal threshold for the ANN model prediction is 0.11.
 
 # Combining Models Together
 
+To combine the three models together, we created a new variable which was a sum of all the predictions from the three different models. To do this, we first had to convert the KNN predictions into a number (from a factor), and then we can sum them using simple addition. Next, we created a new variable, binary_combined_call which was equal to 1 if at least 2 models predicted a successful call, else 0. Below you can see the code we used for this process and the confusion matrix comparing the predicted outcome to real outcomes with the test data using all three models combined.
+
 ```{r}
 
-# summation function 
-# if else statement of 2 or more to make binary prediction
+#first we have to convert optimal_knn_pred into a number
 
-# test combo model against actual test data outcomes
+optimal_knn_pred <- as.numeric(as.character(optimal_knn_pred))
 
+summed_predictions <- optimal_knn_pred + binarypred_5hidden + log_pred_ME_binary
 
+binary_combined_call <- ifelse(summed_predictions >= 2 , 1, 0)
 
-
-
+library(caret)
+confusionMatrix(as.factor(binary_combined_call) , as.factor(log_test$yyes) , positive = "1")
 
 ```
 
