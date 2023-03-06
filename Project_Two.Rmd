@@ -19,17 +19,24 @@ knitr::opts_chunk$set(echo = TRUE)
 
 # Executive Summary
 
-**[insert exec summary]**
+In our analysis, three models are used and combined to best predict successful telemarketing calls: kNN, LR, ANN. All of these models are trained on a large data set with 20 potential predictor variables, such as age, occupation, marital status, and other relevant information about the call center’s call efforts. In order to prepare the data for building more accurate models, we deleted variables such as those that were measured after a call and transformed all factor variables to dummy variables. 
+
+In our logistic regression model, a for loop that calculates the profit level for each threshold in the range from 0 to 1 provides an optimal threshold range of 0.15 to 0.25. From an economic perspective, we may also consider the opportunity costs of not making a call that was predicted to not be successful when in actuality it might have resulted in a sale. This was considered in our adjustments of the outcome weights matrix.
+
+Next, in our kNN model, we found an optimal k value for both accuracy and profit is 9. We attempted to run a model with parameters 1, 7 and 9. K=1 was our starting point, and from there we determined that while k=7 was the most accurate model, k=9 was what maximized profitability. We were able to write a for loop that considered revenue and opportunity cost. 
+
+In our final ANN model, we attempted to run an ANN model on the data using 1, 5, and 20 as potential hidden values. From these model results, we chose to predict outcomes using hidden values equal to 5. Similar to our logistic regression model, we also must optimize the binary prediction threshold to maximize profits. The process here mirrors the steps we took previously to find an optimal value of 0.11.
+
+Finally, we combined our three models. In order to do this, we first converted our KNN predictions from a number to a factor. Then we created a new binary variable with the criteria that at least 2 of the 3 models predicted a successful call and analyzed our final confusion matrix. This was used to determine a recommendation and improve profitability. Through a financial analysis discussed below, we were able to drive the highest profit with the recommendations of our logistic regression model. 
+
+Overall, in each of these models we must consider success rate, increased revenue, and decreased opportunity cost from missed profits. These models can be a very useful tool for the bank by providing a deeper insight into how different variables may impact the success rate of telemarketing calls. With the ability to accurately predict call outcomes, companies can make more targeted calls, and better minimize their costs to maximize profits from these calls.
+
 
 # Intro
 
-**[insert intro]**
+Telemarketing efforts are important to generate sales and attract new customers for companies. These calls also serve to maintain communication with customers to gain feedback on products and services. Successful telemarketing calls are essential to target more willing buyers and maximize profits associated with this marketing strategy. In this project, we attempt to understand why a bank’s call center is not profitable and better predict when a call will be successful or not to improve the current 11.26% success rate. The company also experiences a current profit of -$13,348 and a break-even success rate of 16.667%.
 
-- introduce problem and process to solve
-
-- current success rate = 11.26%
-- current profit = -13,348
-- break even success rate = 16.667%
+So, we will analyze tele-marketing data on 41,000 tele-marketing calls to sell term deposits in conjunction with general cost and revenue data to determine an optimal prediction model. An array of variables covering both social and economic factors, last contact, bank client data etc. are utilized to determine whether or not the call will be successful.
 
 
 ## Downloading and Prepping the Data
@@ -56,6 +63,13 @@ summary(tele$y) #this was used to calculate some of the statistics in the intro
 
 ```
 
+```{r}
+#loading required libraries
+library(caret)
+library(class)
+library(neuralnet)
+library(gmodels)
+```
 
 
 ## Getting Data Ready for Analysis
@@ -114,6 +128,7 @@ See the following code along with comments which outline the process we followed
 
 ```{r log model main effects}
 
+#creating main log. reg. model
 log_model_ME <- glm(yyes ~ . , data = log_train , family = "binomial")
 
 
@@ -122,10 +137,10 @@ summary(log_model_ME)
 
 log_pred_ME <- predict(log_model_ME , log_test , type = "response")
 
-log_pred_ME_binary <- ifelse(log_pred_ME >= 0.3, 1, 0) # have to find the right threshold here; may be useful to find break even rates
+#Using a threshold of 0.3, transforming predictions to a binary value
+log_pred_ME_binary <- ifelse(log_pred_ME >= 0.3, 1, 0)
 
 
-library(caret)
 confmat <- confusionMatrix(as.factor(log_pred_ME_binary) , as.factor(log_test$yyes), positive = "1")
 
 confmat
@@ -153,8 +168,9 @@ for (i in threshold_list) {
   outcome <- rbind(outcome,nrow)
 }
 #the loop resulted in the outcome data-frame, which contain the bottom line profit for each threshold level. 
-# We have build a line plot to visualize the result form the loop, from which is apparent that the optimal threshold resides between 0.15 and 0.25. As a matter of fact, a threshold of 0.19 return a profit of 2493 $, which is the highest possible. 
-#NB. It is possible to take into account the opportunity cost of losing the call for which we predicted a negative outcome but which actually could have been resulted in a loan subscription. In that case we should adjust the outcome_weights matrix for a value x in c(0, x , -1, 5) that accounts for the opportunity cost (-5<x<0). 
+# We have built a line plot to visualize the result form the loop, from which is apparent that the optimal threshold resides between 0.15 and 0.25. As a matter of fact, a threshold of 0.19 return a profit of 2493 $, which is the highest possible. 
+#NB. It is possible to take into account the opportunity cost of losing the call for which we predicted a negative outcome but would actually have resulted in a loan subscription. In that case we should adjust the outcome_weights matrix for a value x in c(0, x , -1, 5) that accounts for the opportunity cost (-5<x<0).
+
 outcome
 ggplot(outcome, aes(x = threshold, y = profit)) + 
   geom_line() + 
@@ -177,20 +193,12 @@ opt_conf_mat_wg #this is the confusion matrix after applying the weights
 The first KNN model we tried was simple with k=1 nearest neighbors. This gives us an idea of a starting point to determine the optimal KNN model for the call center to use.
 
 ```{r first knn, cache=TRUE}
-
-library(class)
+#Base model
 knn_model_first <- knn(tele_train , tele_test , cl = tele_train_labels, k = 1)
-
-
-
-```
-
-```{r}
-
-library(caret)
 confusionMatrix(as.factor(knn_model_first) , as.factor(tele_test_labels) , positive = "1")
 
 ```
+
 
 As shown in the confusion Matrix, this KNN model is missing a large amount of successful calls (false negatives) and therefore is missing out on a large amount of potential profit. To determine the optimal K value we can run various for loops which test different k values for both accuracy and profitability (taking opportunity cost into account). 
 
@@ -198,6 +206,8 @@ As shown in the confusion Matrix, this KNN model is missing a large amount of su
 ## Finding optimal k value based on model accuracy
 
 ```{r knn optimal accuracy, cache=TRUE}
+#Using a loop to test k=1 to k=10 to determine k value with highest accuracy
+
 accuracies<- c()
 for (i in 1:10){ 
     knn.mod <-  knn(train=tele_train, test=tele_test, cl=tele_train_labels, k=i)
@@ -208,22 +218,18 @@ for (i in 1:10){
 }
 ```
 ```{r}
-plot(accuracies, type = "o", xlab="k value", ylab = "Accuracy %")
+#Line plot showing the k values 1-10 vs. the accuracy
+plot(accuracies, type = "o", xlab="k value", ylab = "Accuracy %", main = "K-value vs. Accuracy %")
 ```
 
 
 ## Finding financially optimal k value
 
 
-```{r}
-library(gmodels)
-
-```
-
-
 ```{r knn optimal profits, cache=TRUE}
-profits <- c()
+#Using a loop to test k=1 to k=10 to determine k value that yields the largest profit
 
+profits <- c()
 for (i in 1:10){
   knn.mod2 <-  knn(train=tele_train, test=tele_test, cl=tele_train_labels, k=i)
   crosstab <- CrossTable(knn.mod2 , tele_test_labels, prop.r = FALSE, prop.c = FALSE, prop.t = FALSE, prop.chisq = FALSE)
@@ -240,17 +246,16 @@ for (i in 1:10){
 ```
 
 ```{r}
-plot(profits, type = "o", xlab="k value", ylab = "Profit $")
+#Line plot showing the k values 1-10 vs. profit
+plot(profits, type = "o", xlab="k value", ylab = "Profit $", main = "K-value vs. Profit ($)")
 
 ```
 
-You can see that if you were to look soley based on the accuracy of the model, the optimal k would have been 7. However, the scope of this project is to make the call center the most profitable rather than make the model the most accurate, therefore we can see that the true optimal k once profitability and opportunity cost are taken into account is k=9. Below is the code for a KNN model using the optimal k value of 9.
+You can see that if you were to look soley based on the accuracy of the model, the optimal k would have been 7. However, the goal of this project is to make the call center the most profitable rather than make the model the most accurate, therefore we can see that the true optimal k once profitability and opportunity cost are taken into account is k=9. Below is the code for a KNN model using the optimal k value of 9.
 
 ```{r optimal knn model}
-library(class)
 optimal_knn_pred <- knn(tele_train , tele_test , cl = tele_train_labels, k = 9)
 
-library(class)
 confusionMatrix(as.factor(optimal_knn_pred) , as.factor(tele_test_labels) , positive = "1")
 
 ```
@@ -259,7 +264,7 @@ confusionMatrix(as.factor(optimal_knn_pred) , as.factor(tele_test_labels) , posi
 
 # ANN Model
 
-Per our discussion with Professor Kumar's, we attempted to run an ANN model on the data using 1, 5, and 20 as potential hidden values. In the first two code blocks below, you can see our code which runs an ANN model using both 1 and 5 for hidden values and saving them to RDS files respectively. However, due to the limited computing power of our personal laptops, we were unable to get an ANN model with hidden = 20 to run successfully. The code which we unsuccessfully attempted is also illustrated below in the third code block.
+Per our discussion with Professor Kumar, we attempted to run an ANN model on the data using 1, 5, and 20 as potential hidden values. In the first two code blocks below, you can see our code which runs an ANN model using both 1 and 5 for hidden values and saving them to RDS files respectively. However, due to the limited computing power of our personal laptops, we were unable to get an ANN model with hidden = 20 to run successfully. The code which we unsuccessfully attempted is also illustrated below in the third code block. 
 
 We chose to save each model into an RDS file then mark that code block as eval=FALSE because it prevents the computer from having to re-run the ANN model each time the file is knitted while still being able to keep the entire project on one cohesive rmd and html. 
 
@@ -268,10 +273,6 @@ We chose to save each model into an RDS file then mark that code block as eval=F
 Below is the code which generates an ANN model with hidden = 1.
 
 ```{r ann 1 hidden, eval=FALSE}
-
-
-library(neuralnet)
-library(caret)
 
 ann_model_1hidden <- neuralnet(yyes ~ . , data = log_train, hidden = 1)
 saveRDS(ann_model_1hidden , "ann_1hidden.rds")
@@ -287,9 +288,6 @@ Below is the code which generates an ANN model with hidden = 5.
 
 ```{r ann 5 hidden, eval=FALSE}
 
-library(neuralnet)
-library(caret)
-
 ann_model_5hidden <- neuralnet(yyes ~ . , data = log_train, hidden = 5)
 saveRDS(ann_model_5hidden , "ann_5hidden.rds")
 
@@ -301,9 +299,6 @@ saveRDS(ann_model_5hidden , "ann_5hidden.rds")
 Below is the code which would have generated an ANN model with hidden = 20, had our computers had enough computing resources to build the train the model.
 
 ```{r ann 20 hidden, eval=FALSE}
-
-library(neuralnet)
-library(caret)
 
 ann_model_20hidden <- neuralnet(yyes ~ . , data = log_train, hidden = 20)
 saveRDS(ann_model_20hidden , "ann_20hidden.rds")
@@ -324,7 +319,6 @@ pred_5hidden <- predict(hidden5_RDS , log_test)
 # we need to optimize the profits based on what we have for the threshold under binarypred_5hidden
 binarypred_5hidden <- ifelse(pred_5hidden >= 0.5 , 1, 0)
 
-library(caret)
 confusionMatrix(as.factor(binarypred_5hidden) , as.factor(log_test$yyes) , positive = "1")
 
 ```
@@ -339,7 +333,6 @@ As stated above, we need to code a for loop to find the threshold which will max
 ```{r}
 
 
-library(caret)
 confmat_ann <- confusionMatrix(as.factor(binarypred_5hidden) , as.factor(log_test$yyes), positive = "1")
 
 confmat_ann
@@ -375,7 +368,6 @@ ggplot(outcome_ann, aes(x = threshold, y = profit)) +
 
 binarypred_5hidden <- ifelse(pred_5hidden >= 0.11 , 1, 0)
 
-library(caret)
 confusionMatrix(as.factor(binarypred_5hidden) , as.factor(log_test$yyes) , positive = "1")
 
 
@@ -398,7 +390,6 @@ summed_predictions <- optimal_knn_pred + binarypred_5hidden + log_pred_ME_binary
 
 binary_combined_call <- ifelse(summed_predictions >= 2 , 1, 0)
 
-library(caret)
 confusionMatrix(as.factor(binary_combined_call) , as.factor(log_test$yyes) , positive = "1")
 
 ```
@@ -408,8 +399,47 @@ confusionMatrix(as.factor(binary_combined_call) , as.factor(log_test$yyes) , pos
 
 # Results and Analysis
 
-**[INSERT RESULTS AND ANALYSIS]**
+Ultimately, all of our technical analysis is only useful once we can analyze the results and what this means for the business. As previously mentioned, we created, optimized, and ran four different models – with one being the combination of the three – and can now analyze our results. For each model we used a confusion matrix to analyze our results. Each confusion matrix gives us four scenarios: 1. Correct positive predictions 2. Correct negative prediction 3. False positive prediction 4. False negative prediction. Each of these four values can be directly attributed to a financial result as we know that each call cost $1 and a successful call results in $6 in revenue. Therefore, in situation 1 (correct positive prediction) we earn $5 in profit ($6 revenue - $1 in call cost), situation 2 we earn $1 in opportunity cost because we do not call someone who wouldn’t buy our product, situation 3 we earn $-1 in real profit because we call someone unsuccessfully, and in situation 4 we earn $-5 in opportunity cost profit because we do not call someone who would have purchased our product. 
+
+Understanding all four scenarios is crucial to optimize our models for both accounting profit and opportunity cost as this is the most accurate representation of an optimal business scenario. Therefore, we used each of these four different scenarios, and their attributed financial impact, when optimizing our models. However, when analyzing the final results of each model, we are only looking at bottom-line profit as this is what the company would ultimately experience in terms of business impact. This profit analysis can be done simply by completing the equation:
+
+Profit = (# of successful calls) * $6 - (# of total calls) * $1 
+
+Final Logistic Regression
+Confusion matrix results: 1. Correct positive predictions = 667 2. Correct negative prediction = 8009 3. False positive prediction = 842 4. False negative prediction = 482
+
+Profit = (667 successful calls) * $6 - (667 + 842) * $1
+Profit = $4002 - $1509
+Profit = $2,493
+
+Final KNN Model
+Confusion matrix results: 1. Correct positive predictions = 243 2. Correct negative prediction = 8680 3. False positive prediction = 171 4. False negative prediction = 906
+
+Profit = (243 successful calls) * $6 - (243 + 171) * $1
+Profit = $1458 - $414
+Profit = $1,044
+
+Final ANN Model
+Confusion matrix results: 1. Correct positive predictions = 672 2. Correct negative prediction = 7909 3. False positive prediction = 942 4. False negative prediction = 477
+
+Profit = (672 successful calls) * $6 - (672 + 942) * $1
+Profit = $4032 - $1614
+Profit = $2,418
+
+Combined Model
+Confusion matrix results: 1. Correct positive predictions = 635 2. Correct negative prediction = 8105 3. False positive prediction = 746 4. False negative prediction = 514
+
+Profit = (635 successful calls) * $6 - (635 + 746) * $1
+Profit = $3810 - $1381
+Profit = $2,429
+
+The final result of this analysis shows that the logistic regression model yields the highest at $2,493 from a test size of 10,000 customers. While it may have seemed logical that our combined model would be the best model, our profit analysis shows otherwise. One reason may be because the KNN model has a much smaller amount of total calls than the other two models which results in the combined having fewer total calls than the logistic regression model as well. 
 
 # Conclusion
 
-**[INSERT CONCLUSION]**
+Our group was posed with the problem of trying to improve the profitability of a telemarketing call center. Before our group’s analysis, the call center operated with an 11.26% success rate and its operating profit requires a 16% success rate to break even. This gap clearly shows that the call center's historic success rate would result in negative profitability and our goal was to turn this around. 
+
+After building, optimizing, and running four different models we have come to the conclusion that the best predictive model that this call bank can use is our logistic regression model. Using a test group of 10,000 potential customers, our logistic regression model results in 1,509 calls of which 667 will be successful, yielding a profit of $2,493. Our success rate on calls is 44% (667/1509) which far and away clears the 16% hurdle needed to break even. 
+
+Prior to our analysis, the company’s bottom line profit was The company was also losing money, with profits of -$13,348. Through our analysis, we have increased their profit by $15,841. Ultimately, using our model building and technical analysis, we have drastically improved the success rate and profitability of this call center and put it on track for a profitable future. 
+
